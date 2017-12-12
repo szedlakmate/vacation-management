@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, url_for
 
 app = Flask(__name__)
 
@@ -6,6 +6,9 @@ app = Flask(__name__)
 def index():
     return 'Hello World!'
 
+
 if __name__ == "__main__":
     ssl_context=('./app/self.vacation.crt','./app/self.vacation.key')
     app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=ssl_context)
+    #app.add_url_rule('/favicon.ico',
+    #                 redirect_to=url_for('static', filename='img/favicon.ico'))
