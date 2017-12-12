@@ -3,5 +3,7 @@ services:
   web:
     build: .
     ports:
-     - "80:80"
-    command: python3 app.py
+     - "80:5000"
+    volumes:
+    - ./app:/code/app
+    command: python3 ./app/app.py
