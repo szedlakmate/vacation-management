@@ -1,1 +1,23 @@
+# MySQL for Python 3
+mysqlclient == 1.3.12
+
+# Flask dependecies
+Jinja2 == 2.10
+MarkupSafe == 1.0
+Werkzeug == 0.13
+click == 6.7
+itsdangerous == 0.24
+six == 1.11.0
+
+# Flask
 flask == 0.12.2
+flask_script == 2.0.6
+flask_migrate == 2.1.1
+flask_appconfig == 0.11.1
+
+# SQL Alchemy
+SQLAlchemy == 1.1.15
+Flask-SQLAlchemy == 1.0             # Needed to be fixed to 1.0
+
+# Other
+simplejson == 3.13.2
