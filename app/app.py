@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, request
+from flask import Flask, url_for, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 import simplejson as json
 
@@ -11,11 +11,11 @@ from model import app as application
 from model import db
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/code/app/static')
 
 @app.route('/')
 def index():
-    return 'Hello World!'
+    return render_template("landing.html")
 
 
 @app.route('/reset')
