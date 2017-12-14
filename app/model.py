@@ -44,14 +44,33 @@ class User(db.Model):
     # Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
+class CalendarType(db.Model):
+    # Data Model User Table
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+
+
+    def __init__(self, name, id=None):
+        # initialize columns
+        if id:
+            self.id = id
+        self.name = name
+
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+    # Hashes shall be refreshed after certain time (eg. at every bootup)
+
+
 class CreateDB():
     def __init__(self, hostname=None):
+        import sqlalchemy
+
         if hostname is not None:
             HOSTNAME = hostname
-        import sqlalchemy
         engine = sqlalchemy.create_engine('mysql://%s:%s@%s'%(USER, PASSWORD, HOSTNAME)) # connect to server
         ResetDB(engine)
-        engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(DATABASE)) #create db
+        engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(DATABASE))
 
 
 class SetUpDB():
@@ -71,7 +90,7 @@ class SetUpDB():
                 db.session.rollback()
                 return json.dumps(
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
-        """for calendar in BASECALENDARS:
+        for calendar in BASECALENDARS:
             try:
                 newcalendar = CalendarType(name=calendar['name'], id=calendar['id'])
                 db.session.add(newcalendar)
@@ -82,7 +101,7 @@ class SetUpDB():
                 db.session.rollback()
                 return json.dumps(
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
-"""
+
 
 
 def ResetDB(engine):

@@ -12,6 +12,8 @@ flask == 0.12.2
 SQLAlchemy == 1.1.15
 Flask-SQLAlchemy == 1.0
 
+
+# Inserted by merging
 flask_script
 flask_migrate
 mysqlclient			# MySQL for Python 3

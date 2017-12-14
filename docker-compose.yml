@@ -10,7 +10,7 @@ web:
 
 db:
     hostname: mysqlserver
-    image: mysql:5.7.20 #mariadb:latest
+    image: mysql:5.7.20
     volumes:
       - db:/var/lib/mysql
     restart: always

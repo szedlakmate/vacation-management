@@ -21,20 +21,16 @@ def index():
 def createUserTable():
     try:
         db.create_all()
-        return json.dumps({'status': True})
+        #return json.dumps({'status': True})
     except IntegrityError:
         db.session.rollback()
-        return json.dumps({'status': False})
+        #return json.dumps({'status': False})
 
 
 @app.route('/reset')
 def createDatabase():
     HOSTNAME = 'mysqlserver'
-    try:
-        HOSTNAME = request.args['hostname']
-    except:
-        pass
-    database = CreateDB(hostname='mysqlserver')
+    database = CreateDB(hostname=HOSTNAME)
     createUserTable()
     return redirect(url_for('setup'))
 
