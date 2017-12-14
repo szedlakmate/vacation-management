@@ -61,7 +61,7 @@ class User(db.Model):
         if account_type:
             self.account_type = account_type
         if account_status:
-            self.account_type = account_status
+            self.account_status = account_status
 
 
     def __repr__(self):
@@ -69,7 +69,7 @@ class User(db.Model):
     # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
-class CalendarType(db.Model):
+class Calendar(db.Model):
     # Data Model User Table
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
@@ -79,6 +79,28 @@ class CalendarType(db.Model):
         if id:
             self.id = id
         self.name = name
+
+
+class Holiday(db.Model):
+    # Data Model User Table
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=False)
+    calendar_id = db.Column(db.Integer, ForeignKey("calendar.id"), nullable=False)
+    start = db.Column(db.Date, unique=False, nullable=False)
+    end = db.Column(db.Date, unique=False, nullable=False)
+    note = db.Column(db.String(15), unique=False, nullable=True)
+    status = db.Column(db.Integer, unique=False, nullable=False, default = 0)
+
+    def __init__(self, user_id, calendar_id, start, end, id=None, note=None):
+        # initialize columns
+        if id:
+            self.id = id
+        self.user_id = user_id
+        self.calendar_id = calendar_id
+        self.start = start
+        self.end = end
+        if note:
+            self.note = note
 
 
 class createDB():
@@ -115,7 +137,7 @@ def setupDB():
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
     for calendar in BASECALENDARS:
         try:
-            newcalendar = CalendarType(name=calendar['name'], id=calendar['id'])
+            newcalendar = Calendar(name=calendar['name'], id=calendar['id'])
             db.session.add(newcalendar)
             db.session.commit()
         except KeyError:  # IntegrityError:

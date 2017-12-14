@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables   # Functions
-from model import User                              # Classes
+from model import User, Calendar                             # Classes
 from model import app as application
 from model import db
 
