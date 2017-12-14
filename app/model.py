@@ -28,19 +28,45 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
+def hashid(hashable):
+    return hash(str(hashable) & "mfkFJ_5_SIDOfsd" & str(hashable))
+
+
 class User(db.Model):
     # Data Model User Table
     id = db.Column(db.Integer, primary_key=True)
-    id_hash = db.Column(db.String(80), unique=True, nullable=False)
+    ext_id = db.Column(db.String(200), unique=True, nullable=False) # XXX prefix should be added
+    ext_id_hashed = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=False, nullable=False)
+    nickname = db.Column(db.String(8), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    avatar_url = db.Column(db.String(200), unique=False, default="https://t3.ftcdn.net/jpg/00/64/67/52/240_F_64675209_7ve2XQANuzuHjMZXP3aIYIpsDKEbF5dD.jpg")
+    birthday = db.Column(db.Date, unique=False, nullable=False)     # XXX Should be Nullable
+    account_type = db.Column(db.Integer, unique=False, nullable=False, default=0)
+    account_status = db.Column(db.Integer, unique=False, nullable=False, default=0)
+    account_created = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
 
-    def __init__(self, username, nickname, google_id, avatar, email, birthday, id=None, account_status=None):
+    def __init__(self, ext_id, name, nickname, email, birthday, avatar_url=None, id=None, account_type= None, account_status=None):
         # initialize columns
         if id:
             self.id = id
+        self.ext_id = ext_id
+        self.ext_id_hashed = hashid(ext_id)
+        self.name = name
+        self.nickname = nickname
+        self.email = email
+        self.birthday = birthday
+        if avatar_url:
+            self.avatar_url = avatar_url
+        if account_type:
+            self.account_type = account_type
+        if account_status:
+            self.account_type = account_status
+
 
     def __repr__(self):
-        return '<User %r>' % self.username
-    # Hashes shall be refreshed after certain time (eg. at every bootup)
+        return '<User %r>' % self.nickname
+    # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
 class CalendarType(db.Model):
