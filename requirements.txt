@@ -19,5 +19,9 @@ flask_appconfig == 0.11.1
 SQLAlchemy == 1.1.15
 Flask-SQLAlchemy == 1.0             # Needed to be fixed to 1.0
 
+# Google login
+oauthlib == 2.0.6
+requests_oauthlib == 0.8.0
+
 # Other
 simplejson == 3.13.2

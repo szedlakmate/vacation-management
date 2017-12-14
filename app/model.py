@@ -28,8 +28,8 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
-def hashid(hashable):
-    return hash(str(hashable) & "mfkFJ_5_SIDOfsd" & str(hashable))
+def hashID(hashable):
+    return hash(str(hashable) + "mfkFJ_5_SIDOfsd" + str(hashable))
 
 
 class User(db.Model):
@@ -50,7 +50,7 @@ class User(db.Model):
         if id:
             self.id = id
         self.ext_id = ext_id
-        self.ext_id_hashed = hashid(ext_id)
+        self.ext_id_hashed = hashID(ext_id)
         self.name = name
         self.nickname = nickname
         self.email = email
