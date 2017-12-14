@@ -54,11 +54,6 @@ class CalendarType(db.Model):
             self.id = id
         self.name = name
 
-"""
-    def __repr__(self):
-        return '<User %r>' % self.username
-    # Hashes shall be refreshed after certain time (eg. at every bootup)
-"""
 
 class CreateDB():
     def __init__(self, hostname=None):
