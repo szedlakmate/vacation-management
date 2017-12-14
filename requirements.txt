@@ -10,4 +10,10 @@ flask == 0.12.2
 
 # SQL Alchemy
 SQLAlchemy == 1.1.15
-Flask-SQLAlchemy == 2.3.2
+Flask-SQLAlchemy == 1.0
+
+flask_script
+flask_migrate
+mysqlclient			# MySQL for Python 3
+simplejson
+flask_appconfig

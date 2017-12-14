@@ -1,32 +1,30 @@
-version: '3.3'
-services:
-  web:
+web:
     build: .
     ports:
-     #- "80:5000"
       - "443:5000"
     volumes:
       - ./app:/code/app
     command: python ./app/app.py
-    depends_on:
+    links:
       - db
 
-  db:
-    image: mysql:5.7.20
+db:
+    hostname: mysqlserver
+    image: mysql:5.7.20 #mariadb:latest
     volumes:
-      - db_data:/var/lib/mysql
+      - db:/var/lib/mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: vacation
-      #MYSQL_USER: wordpress
-      #MYSQL_PASSWORD: wordpress
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
 
-  adminer:
-    image: adminer:4.3.1
+adminer:
+    image: adminer
+    container_name: adminer
     restart: always
+    links:
+     - db
     ports:
-      - 8080:8080
-
-volumes:
-    db_data:
+      - "8080:8080"
