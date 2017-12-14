@@ -33,7 +33,7 @@ def hashid(hashable):
 
 
 class User(db.Model):
-    # Data Model User Table
+    # User model
     id = db.Column(db.Integer, primary_key=True)
     ext_id = db.Column(db.String(200), unique=True, nullable=False) # XXX prefix should be added
     ext_id_hashed = db.Column(db.String(50), unique=True, nullable=False)
@@ -47,7 +47,6 @@ class User(db.Model):
     account_created = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
 
     def __init__(self, ext_id, name, nickname, email, birthday, avatar_url=None, id=None, account_type= None, account_status=None):
-        # initialize columns
         if id:
             self.id = id
         self.ext_id = ext_id
@@ -66,11 +65,12 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.nickname
+
     # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
 class Calendar(db.Model):
-    # Data Model User Table
+    # Calendar types model
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
 
@@ -82,7 +82,7 @@ class Calendar(db.Model):
 
 
 class Holiday(db.Model):
-    # Data Model User Table
+    # Holiday event model
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=False)
     calendar_id = db.Column(db.Integer, ForeignKey("calendar.id"), nullable=False)
@@ -101,6 +101,32 @@ class Holiday(db.Model):
         self.end = end
         if note:
             self.note = note
+
+
+class Group(db.Model):
+    # Group types model
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+
+    def __init__(self, name, id=None):
+        # initialize columns
+        if id:
+            self.id = id
+        self.name = name
+
+
+class Group_members(db.Model):
+    # Calendar types model
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, ForeignKey("group.id"), nullable=False)
+    user_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=False)
+
+    def __init__(self, group_id, user_id, id=None):
+        # initialize columns
+        if id:
+            self.id = id
+        self.group_id = group_id
+        self.user_id = user_id
 
 
 class createDB():
