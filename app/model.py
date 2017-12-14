@@ -10,12 +10,13 @@ from sqlalchemy import ForeignKey
 
 app = Flask(__name__)
 DATABASE = 'vacation'
-PASSWORD = 'password'
+PASSWORD = 'password'  # XXX Need to be read from config
 USER = 'root'
 HOSTNAME = 'mysqlserver'
 
 BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
 BASECALENDARS = [{'id':1, 'name':'Normal holiday'},{'id':2, 'name':'Sick-leave'}]
+# XXX Need to be read from config
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(USER, PASSWORD, HOSTNAME, DATABASE)
@@ -32,12 +33,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_hash = db.Column(db.String(80), unique=True, nullable=False)
 
-
     def __init__(self, username, nickname, google_id, avatar, email, birthday, id=None, account_status=None):
         # initialize columns
         if id:
             self.id = id
-
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -49,23 +48,21 @@ class CalendarType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
 
-
     def __init__(self, name, id=None):
         # initialize columns
         if id:
             self.id = id
         self.name = name
 
-
+"""
     def __repr__(self):
         return '<User %r>' % self.username
     # Hashes shall be refreshed after certain time (eg. at every bootup)
-
+"""
 
 class CreateDB():
     def __init__(self, hostname=None):
         import sqlalchemy
-
         if hostname is not None:
             HOSTNAME = hostname
         engine = sqlalchemy.create_engine('mysql://%s:%s@%s'%(USER, PASSWORD, HOSTNAME)) # connect to server
@@ -103,12 +100,11 @@ class SetUpDB():
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
 
 
-
 def ResetDB(engine):
     try:
         engine.execute("DROP DATABASE %s "%(DATABASE))
     except:
-        pass
+        db.session.rollback()
 
 
 if __name__ == '__main__':

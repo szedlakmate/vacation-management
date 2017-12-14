@@ -18,29 +18,22 @@ def index():
     return 'Hello World!'
 
 
-def createUserTable():
+def createTables():
     try:
         db.create_all()
-        #return json.dumps({'status': True})
     except IntegrityError:
         db.session.rollback()
-        #return json.dumps({'status': False})
 
 
 @app.route('/reset')
 def createDatabase():
     HOSTNAME = 'mysqlserver'
     database = CreateDB(hostname=HOSTNAME)
-    createUserTable()
-    return redirect(url_for('setup'))
-
-
-@app.route('/setup')
-def setup():
+    createTables()
     SetUpDB()
     return redirect(url_for('index'))
 
 
 if __name__ == "__main__":
-    ssl_context=('./app/self.vacation.crt','./app/self.vacation.key')
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=ssl_context)
+    context=('./app/self.vacation.crt','./app/self.vacation.key')
+    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=context)
