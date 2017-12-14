@@ -1,5 +1,5 @@
 # MySQL for Python 3
-mysqlclient	== 	1.3.12
+mysqlclient == 1.3.12
 
 # Flask dependecies
 Jinja2 == 2.10
