@@ -23,5 +23,9 @@ Flask-SQLAlchemy == 1.0             # Needed to be fixed to 1.0
 oauthlib == 2.0.6
 requests_oauthlib == 0.8.0
 
+# WTForms
+WTForms
+Flask-WTF
+
 # Other
 simplejson == 3.13.2

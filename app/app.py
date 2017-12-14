@@ -1,15 +1,20 @@
-from flask import Flask, url_for, redirect, render_template, jsonify, session
+from flask import Flask, url_for, redirect, render_template, jsonify, session, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 import simplejson as json
-
 from sqlalchemy.exc import IntegrityError
+
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms.validators import DataRequired
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables, hashID    # Functions
 from model import User, Calendar                             # Classes
 from model import app as application
 from model import db
+
+from form import RegistrationForm
 
 from flask_oauth2_login import GoogleLogin
 
@@ -40,10 +45,10 @@ def login_success(token, profile):
         return redirect('home')
     else:
         session.clear()
-        session['name']=profile['name']
-        session['email']=profile['email']
-        session['picture']=profile['picture']
-        session['id']=profile['id']
+        session['profile_name']=profile['name']
+        session['profile_email']=profile['email']
+        session['profile_picture']=profile['picture']
+        session['profile_id']=profile['id']
         return redirect('register')
 
 
@@ -61,9 +66,32 @@ def index():
     return render_template("landing.html", login_url=google_login.authorization_url())
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template("landing.html", login_url=google_login.authorization_url())
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        account_status = None
+        account_type = None
+        if not len(User.query.all()):
+            account_status = 1
+            account_type = 2
+        profile = User(name=session['profile_name'], nickname=form.nickname.data, ext_id=session['profile_id'],
+                       avatar_url=session['profile_picture'], email=session['profile_email'], birthday=form.birthday.data,
+                       account_status=account_status, account_type = account_type)
+        session['profile_hashedID'] = hashID(session['profile_id'])
+        session.pop('profile_name')
+        session.pop('profile_email')
+        session.pop('profile_picture')
+        session.pop('profile_id')
+        try:
+            db.session.add(profile)
+            db.session.commit()
+        except KeyError:  # IntegrityError:
+            db.session.rollback()
+        except IntegrityError:
+            db.session.rollback()
+
+    return render_template('register.html', form=form)
 
 
 @app.route('/reset')
