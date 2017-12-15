@@ -26,10 +26,11 @@ from flask_oauth2_login import GoogleLogin
 # Global debugging switch
 # To start debugging in docker-compose, run the container the following way:
 # docker-compose run --service-ports web
+DEBUG_Flask = True
 DEBUG = False
 
-if DEBUG:
-    import pdb
+import pdb # XXX Should be excluded from final version
+
 
 def appConfig():
     AppConfig(app, configfile=None)
@@ -38,11 +39,11 @@ def appConfig():
     # You must configure these 3 values from Google APIs console
     # https://code.google.com/apis/console          mateszedlak@invenshure.com
     app.config.update(
-        SECRET_KEY="secret",
-        GOOGLE_LOGIN_REDIRECT_SCHEME="https",
+        SECRET_KEY = ConfigData.SECRET_KEY,
+        GOOGLE_LOGIN_REDIRECT_SCHEME = ConfigData.GOOGLE_LOGIN_REDIRECT_SCHEME,
     )
-    app.config["GOOGLE_LOGIN_CLIENT_ID"] = '945161050960-9uafb16faeljklnvpu8gp31h5u23l517.apps.googleusercontent.com'
-    app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = 'qAH_V-G5Gx49uk1VmsoVioo4'
+    app.config["GOOGLE_LOGIN_CLIENT_ID"] = ConfigData.GOOGLE_LOGIN_CLIENT_ID
+    app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = ConfigData.GOOGLE_LOGIN_CLIENT_SECRET
 
 
 # Initialize web app
@@ -58,6 +59,7 @@ def login_success(token, profile):
     if (User.query.filter(User.ext_id == profile['id']).first() is not None):
         session['profile_ext_id_hashed'] = hashID(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
+        db.session.commit()
         return redirect("home")#redirect('home')
     else:
         session.clear()
@@ -75,7 +77,7 @@ def login_failure(e):
         session.clear()
     except Exception:
         pass
-    return redirect("index")
+    return redirect(url_for('index'))
 
 
 @app.route('/')
@@ -124,8 +126,7 @@ def register():
 @app.route('/home')
 def home():
     # Standard conditions *************************************
-    if True:
-        import pdb
+    if DEBUG:
         pdb.set_trace()
     if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is None):
         session.clear()
@@ -134,6 +135,15 @@ def home():
         return render_template("waitforapproval.html")
     # End of standard conditions ******************************
     return render_template("home.html")
+
+
+@app.route('/logout')
+def logout():
+    try:
+        session.clear()
+    except Exception:
+        pass
+    return redirect("home")
 
 
 @app.route('/reset')
@@ -146,4 +156,4 @@ def reset():
 
 if __name__ == "__main__":
     context=('./app/self.vacation.crt','./app/self.vacation.key')
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=context)
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG_Flask, ssl_context=context)

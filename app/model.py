@@ -19,9 +19,13 @@ DATABASE = 'vacation'
 PASSWORD = 'password'  # XXX Need to be read from config file
 USER = 'root'
 
-
+# Configuration data
 class ConfigData():
     HOSTNAME = 'mysqlserver'
+    GOOGLE_LOGIN_CLIENT_SECRET = 'qAH_V-G5Gx49uk1VmsoVioo4'
+    GOOGLE_LOGIN_CLIENT_ID = '945161050960-9uafb16faeljklnvpu8gp31h5u23l517.apps.googleusercontent.com'
+    GOOGLE_LOGIN_REDIRECT_SCHEME = 'https'
+    SECRET_KEY = 'secret'
 
 BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
 BASECALENDARS = [{'id':1, 'name':'Normal holiday'},{'id':2, 'name':'Sick-leave'}]
@@ -92,7 +96,7 @@ class Calendar(db.Model):
 class Holiday(db.Model):
     # Holiday event model
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, ForeignKey("user.ext_id"), nullable=False)
     calendar_id = db.Column(db.Integer, ForeignKey("calendar.id"), nullable=False)
     start = db.Column(db.Date, unique=False, nullable=False)
     end = db.Column(db.Date, unique=False, nullable=False)
