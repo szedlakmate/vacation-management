@@ -18,14 +18,17 @@ app = Flask(__name__)
 DATABASE = 'vacation'
 PASSWORD = 'password'  # XXX Need to be read from config file
 USER = 'root'
-HOSTNAME = 'mysqlserver'
+
+
+class ConfigData():
+    HOSTNAME = 'mysqlserver'
 
 BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
 BASECALENDARS = [{'id':1, 'name':'Normal holiday'},{'id':2, 'name':'Sick-leave'}]
 # XXX Need to be read from config file
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(USER, PASSWORD, HOSTNAME, DATABASE)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(USER, PASSWORD, ConfigData.HOSTNAME, DATABASE)
 db = SQLAlchemy(app)
 
 # Database migration command line
@@ -35,7 +38,7 @@ manager.add_command('db', MigrateCommand)
 
 
 def hashID(hashable):
-    return hash(str(hashable) + "mfkFJ_5_SIDOfsd" + str(hashable))
+    return hash(str(hashable) + "mfkF")
 
 
 class User(db.Model):
