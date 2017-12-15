@@ -10,18 +10,18 @@
 <body>
 	<nav class="navbar navbar-light bg-light">
 		<div>
-			<a class="navbar-brand" href="#">
-				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="60" height="50" class="d-inline-block align-top" alt="">
+			<a class="navbar-brand no-padding"  href="#">
+				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
 				Vacation Manager
 			</a>
 			<a class="nav-item" href="/newevent">
-				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="40" height="40" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
 			</a>
 		</div>
 
 		<div>
 			<a class="d-inline" href="/calendars">
-				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="20" height="20" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
 			</a>
 
 			<a class="d-inline" href="/groups">
@@ -32,12 +32,12 @@
 				Users
 			</a>
 
-			<a class="d-inline avatar" href="#">
+			<a class="d-inline avatar" href="/profile">
 				<img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
 			</a>
 
 			<a class="d-inline" href="/logout">
-				<img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="20" height="20" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="30" height="30" class="d-inline-block align-top" alt="">
 			</a>
 		</div>
 	</nav>

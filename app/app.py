@@ -52,6 +52,12 @@ appConfig()
 google_login = GoogleLogin(app)
 
 
+# ****************************************
+#   MISSING PAGES:
+# calendars, groups, users, profile
+# ****************************************
+
+
 @google_login.login_success
 def login_success(token, profile):
     if DEBUG:
