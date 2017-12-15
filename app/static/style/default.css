@@ -22,11 +22,12 @@ body{
     display: block;
     margin: -1px;
     overflow: hidden;
-    position: fixed;
-    right: 50px;
-    height: 40px;
+    position: static;
+}
+
+.avatar-img {
     width: 40px;
-    z-index: 0;
+    height: 40px;
 }
 
 #script-warning {
