@@ -2,7 +2,14 @@ from wtforms import Form, BooleanField, StringField, validators, DateTimeField, 
 from wtforms.fields.html5 import DateField                                          # Special form field
 from model import Calendar
 
+# *************************************************
+#                FORM DESCRIPTIONS
+# *************************************************
 
+# This file holds all the form compositions.
+# New forms shall be registered here
+
+# User registration form
 class RegistrationForm(Form):
     nickname = StringField('Username', [validators.Length(min=3, max=10)])
     birthday  = DateField('Your date of birth')
@@ -12,7 +19,7 @@ class RegistrationForm(Form):
 def enabled_calendars():
     return Calendar.query.all()
 
-
+# Adding new event form
 class NewEventForm(Form):
     #from wtforms.ext.sqlalchemy.fields import QuerySelectField
     calendar = IntegerField('Calendar ID') #QuerySelectField(query_factory=enabled_calendars, allow_blank=True)

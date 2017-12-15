@@ -8,6 +8,12 @@ import datetime
 # Database Configurations
 from sqlalchemy import ForeignKey
 
+# *************************************************
+#                     DATA MODEL
+# *************************************************
+
+# This data model file holds all the database descriptions. The data structure is built on this file.
+
 app = Flask(__name__)
 DATABASE = 'vacation'
 PASSWORD = 'password'  # XXX Need to be read from config file
@@ -65,7 +71,6 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.nickname
-
     # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
@@ -129,6 +134,7 @@ class Group_members(db.Model):
         self.user_id = user_id
 
 
+# Connecting to the mysql service and creating database if needed
 class createDB():
     def __init__(self, hostname=None):
         import sqlalchemy
@@ -139,6 +145,7 @@ class createDB():
         engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(DATABASE))
 
 
+# Reset: deleting previous traces
 def resetDB(engine):
     try:
         engine.execute("DROP DATABASE %s "%(DATABASE))
@@ -146,6 +153,16 @@ def resetDB(engine):
         db.session.rollback()
 
 
+# Creating tables
+def createTables():
+    from sqlalchemy.exc import IntegrityError
+    try:
+        db.create_all()
+    except IntegrityError:
+        db.session.rollback()
+
+
+# Setting up the initial records
 def setupDB():
     from sqlalchemy.exc import IntegrityError
     import simplejson as json
@@ -173,13 +190,6 @@ def setupDB():
             return json.dumps(
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
 
-
-def createTables():
-    from sqlalchemy.exc import IntegrityError
-    try:
-        db.create_all()
-    except IntegrityError:
-        db.session.rollback()
 
 
 if __name__ == '__main__':

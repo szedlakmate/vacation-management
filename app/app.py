@@ -4,9 +4,13 @@ from flask_appconfig import AppConfig
 import simplejson as json
 from sqlalchemy.exc import IntegrityError
 
-from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms.validators import DataRequired
+#from flask_wtf import FlaskForm
+#from wtforms import StringField
+#from wtforms.validators import DataRequired
+
+# *************************************************
+#              MAIN BACKEND PROGRAM
+# *************************************************
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables, hashID    # Functions
@@ -18,6 +22,14 @@ from form import RegistrationForm
 
 from flask_oauth2_login import GoogleLogin
 
+
+# Global debugging switch
+# To start debugging in docker-compose, run the container the following way:
+# docker-compose run --service-ports web
+DEBUG = True
+
+if DEBUG:
+    import pdb
 
 def appConfig():
     AppConfig(app, configfile=None)
@@ -33,7 +45,7 @@ def appConfig():
     app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = 'qAH_V-G5Gx49uk1VmsoVioo4'
 
 
-# Initialize webapp
+# Initialize web app
 app = Flask(__name__, static_url_path='/code/app/static')
 appConfig()
 google_login = GoogleLogin(app)
@@ -63,6 +75,8 @@ def login_failure(e):
 
 @app.route('/')
 def index():
+    if DEBUG:
+        pdb.set_trace()
     return render_template("landing.html", login_url=google_login.authorization_url())
 
 
@@ -105,4 +119,4 @@ def createDatabase():
 
 if __name__ == "__main__":
     context=('./app/self.vacation.crt','./app/self.vacation.key')
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=context)
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG, ssl_context=context)
