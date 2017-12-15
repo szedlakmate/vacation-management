@@ -85,6 +85,15 @@ def login_failure(e):
         pass
     return redirect(url_for('index'))
 
+"""
+@app.route('/data')
+def return_data():
+    start_date = request.args.get('start', '')
+    end_date = request.args.get('end', '')
+
+    with open("events.json", "r") as input_data:
+        return input_data.read()
+"""
 
 @app.route('/')
 def index():
