@@ -4,10 +4,18 @@
 	<title></title>
 	<meta charset="utf-8">
 
-
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+	<link rel="stylesheet" href="{{ url_for('static', filename='style/default.css') }}">
 </head>
 <body>
-Register
+	<nav class="navbar navbar-light bg-light">
+		<div>
+			<a class="navbar-brand" href="#">
+				<img src= "{{ url_for('static', filename='img/logo.png') }}" width="60" height="50" class="d-inline-block align-top" alt="">
+				Vacation Manager
+			</a>
+		</div>
+	</nav>
 
 
 	{% from "_formhelpers.html" import render_field %}
