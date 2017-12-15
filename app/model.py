@@ -75,10 +75,8 @@ class User(db.Model):
         if account_status:
             self.account_status = account_status
 
-
     def __repr__(self):
         return '<User %r>' % self.nickname
-    # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
 class Calendar(db.Model):

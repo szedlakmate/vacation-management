@@ -60,7 +60,7 @@ def login_success(token, profile):
         session['profile_ext_id_hashed'] = hashID(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
         db.session.commit()
-        return redirect("home")#redirect('home')
+        return redirect('home')
     else:
         session.clear()
         session['profile_name']=profile['name']
@@ -128,13 +128,14 @@ def home():
     # Standard conditions *************************************
     if DEBUG:
         pdb.set_trace()
-    if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is None):
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
         session.clear()
         return redirect(url_for('index'))
-    elif (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first().account_status == 0):
+    elif (user.account_status == 0):
         return render_template("waitforapproval.html")
     # End of standard conditions ******************************
-    return render_template("home.html")
+    return render_template("home.html", avatar_url=user.avatar_url)
 
 
 @app.route('/logout')
