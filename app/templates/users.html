@@ -58,7 +58,11 @@
 	</nav>
 
 	<form action="/activateuser" method="post">
-		<button name="id" value="113894690068878631763">Upvote</button>
+		<ul>
+			{% for user in inactive %}
+				<li>BlaBla <button name="id" value="{{ user.ext_id }}">Activate</button> </li>
+			{% endfor %}
+		</ul>
 	</form>
 
 

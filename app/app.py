@@ -27,7 +27,7 @@ from flask_oauth2_login import GoogleLogin
 # To start debugging in docker-compose, run the container the following way:
 # docker-compose run --service-ports web
 DEBUG_Flask = True
-DEBUG = False
+DEBUG = True
 
 import pdb # XXX Should be excluded from final version
 
@@ -198,8 +198,11 @@ def users():
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
+    if DEBUG:
+        pdb.set_trace()
+    inactive = User.query.filter(User.account_status == 0).all()
     return render_template("users.html",
-                        avatar_url=user.avatar_url)
+                        avatar_url=user.avatar_url, inactive=inactive)
 
 
 @app.route('/logout')
