@@ -102,7 +102,7 @@ def return_data():
     events_arr = []
     for event in events:
         events_arr.append({
-            'title': event.note | 'alma',
+            'title': event.note,
             'start': event.start.isoformat(),
             'end': event.end.isoformat()
         })
