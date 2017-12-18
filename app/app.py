@@ -2,7 +2,7 @@ from flask import Flask, url_for, redirect, render_template, jsonify, session, r
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 #from flask_wtf import FlaskForm
 #from wtforms import StringField
@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables, hashID    # Functions
-from model import User, Calendar, ConfigData                             # Classes
+from model import ConfigData, User, Calendar, Holiday        # Classes
 from model import app as application
 from model import db
 
@@ -27,7 +27,7 @@ from flask_oauth2_login import GoogleLogin
 # To start debugging in docker-compose, run the container the following way:
 # docker-compose run --service-ports web
 DEBUG_Flask = True
-DEBUG = False
+DEBUG = True
 
 import pdb # XXX Should be excluded from final version
 
@@ -52,6 +52,12 @@ appConfig()
 google_login = GoogleLogin(app)
 
 
+# ****************************************
+#   MISSING PAGES:
+# calendars, groups, users, profile
+# ****************************************
+
+
 @google_login.login_success
 def login_success(token, profile):
     if DEBUG:
@@ -60,14 +66,13 @@ def login_success(token, profile):
         session['profile_ext_id_hashed'] = hashID(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
         db.session.commit()
-        return redirect("home")#redirect('home')
+        return redirect('home')
     else:
         session.clear()
         session['profile_name']=profile['name']
         session['profile_email']=profile['email']
         session['profile_picture']=profile['picture']
         session['profile_ext_id']=str(profile['id'])
-        #session['profile_ext_id_hashed'] = hashID(profile['id'])
         return redirect('register')
 
 
@@ -80,14 +85,53 @@ def login_failure(e):
     return redirect(url_for('index'))
 
 
+# Query for Holiday events
+@app.route('/data')
+def return_data():
+    start_date = request.args.get('start', '')
+    end_date = request.args.get('end', '')
+    user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
+    userid_filter = user.ext_id
+    events = Holiday.query.filter((Holiday.user_id == userid_filter) &
+                                  (~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+    events_arr = []
+    for event in events:
+        events_arr.append({
+            'title': event.note,
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat()
+        })
+    return jsonify(events_arr)
+
+# Query for Holiday events
+@app.route('/activateuser', methods=['GET', 'POST'])
+def activateuser():
+    if DEBUG:
+        pdb.set_trace()
+    user_id = request.form.get('id', '')
+    try:
+        user = User.query.filter(User.ext_id == user_id).first()
+        user.account_status = 1
+        db.session.commit()
+    except KeyError:
+        db.session.rollback()
+    except IntegrityError:
+        db.session.rollback()
+    return redirect("users")
+
 @app.route('/')
 def index():
     if DEBUG:
         pdb.set_trace()
-    if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is not None):
-        return redirect('home')
-    else:
-        return render_template("landing.html", login_url=google_login.authorization_url())
+    try:
+        if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is not None):
+            return redirect('home')
+        else:
+            return render_template("landing.html", login_url=google_login.authorization_url())
+    except OperationalError:
+        return redirect("reset")
+        # XXX Should be offered than to be default!
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -128,13 +172,37 @@ def home():
     # Standard conditions *************************************
     if DEBUG:
         pdb.set_trace()
-    if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is None):
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
         session.clear()
         return redirect(url_for('index'))
-    elif (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first().account_status == 0):
-        return render_template("waitforapproval.html")
+    elif (user.account_status == 0):
+        return render_template("message.html",
+                               message="Please wait until admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     # End of standard conditions ******************************
-    return render_template("home.html")
+    return render_template("home.html", avatar_url=user.avatar_url)
+
+
+@app.route('/users')
+def users():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    if DEBUG:
+        pdb.set_trace()
+    inactive = User.query.filter(User.account_status == 0).all()
+    return render_template("users.html",
+                        avatar_url=user.avatar_url, inactive=inactive)
 
 
 @app.route('/logout')

@@ -57,9 +57,13 @@
 		</div>
 	</nav>
 
-    <div id="rightPanel" style="margin-left: 0px; margin-top: 0px;">
-			<div id='calendar'></div>
-    </div>
+	<form action="/activateuser" method="post">
+		<ul>
+			{% for user in inactive %}
+				<li>BlaBla <button name="id" value="{{ user.ext_id }}">Activate</button> </li>
+			{% endfor %}
+		</ul>
+	</form>
 
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

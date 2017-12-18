@@ -5,6 +5,7 @@ web:
     volumes:
       - ./app:/code/app
     command: python ./app/app.py
+    restart: always
     links:
       - db
 

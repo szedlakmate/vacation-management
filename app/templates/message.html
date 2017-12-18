@@ -8,19 +8,26 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='style/default.css') }}">
 </head>
 <body>
-<nav class="navbar navbar-light bg-light">
-	<div class="no-wrap">
-		<a class="navbar-brand" href="#">
-			<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="60" height="50" class="d-inline-block align-top" alt="">
-			Vacation Manager
-		</a>
-	</div>
-	<a class="d-inline" href="/logout">
-		<img src= "{{ url_for('static', filename='img/logout.png') }}"  width="20" height="20" class="d-inline-block align-top" alt="">
-	</a>
-</nav>
+    <nav class="navbar navbar-light bg-light">
+		<div class="no-wrap">
+			<a class="navbar-brand no-padding"  href="#">
+				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
+				Vacation Manager
+			</a>
 
-Wait for admin approval
+		</div>
+
+		<div class="no-wrap">
+            <a class="d-inline avatar" href="/profile">
+                <img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
+            </a>
+            <a class="d-inline" href="/logout">
+                <img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="30" height="30" class="d-inline-block align-top" alt="">
+            </a>
+        </div>
+    </nav>
+
+{{ message }}
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

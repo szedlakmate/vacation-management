@@ -45,13 +45,13 @@ def hashID(hashable):
     return hash(str(hashable) + "mfkF")
 
 
+# User model
 class User(db.Model):
-    # User model
     id = db.Column(db.Integer, primary_key=True)
     ext_id = db.Column(db.String(200), unique=True, nullable=False) # XXX prefix should be added
     ext_id_hashed = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(50), unique=False, nullable=False)
-    nickname = db.Column(db.String(8), unique=True, nullable=False)
+    nickname = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     avatar_url = db.Column(db.String(200), unique=False, default="https://t3.ftcdn.net/jpg/00/64/67/52/240_F_64675209_7ve2XQANuzuHjMZXP3aIYIpsDKEbF5dD.jpg")
     birthday = db.Column(db.Date, unique=False, nullable=False)     # XXX Should be Nullable
@@ -75,14 +75,12 @@ class User(db.Model):
         if account_status:
             self.account_status = account_status
 
-
     def __repr__(self):
         return '<User %r>' % self.nickname
-    # XXX Hashes shall be refreshed after certain time (eg. at every bootup)
 
 
+# Calendar types model
 class Calendar(db.Model):
-    # Calendar types model
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
 
@@ -93,10 +91,10 @@ class Calendar(db.Model):
         self.name = name
 
 
+# Calendar types model
 class Holiday(db.Model):
-    # Holiday event model
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, ForeignKey("user.ext_id"), nullable=False)
+    user_id = db.Column(db.String(200), ForeignKey("user.ext_id"), nullable=False)
     calendar_id = db.Column(db.Integer, ForeignKey("calendar.id"), nullable=False)
     start = db.Column(db.Date, unique=False, nullable=False)
     end = db.Column(db.Date, unique=False, nullable=False)
@@ -115,8 +113,8 @@ class Holiday(db.Model):
             self.note = note
 
 
+# Group types model
 class Group(db.Model):
-    # Group types model
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
 
@@ -127,11 +125,11 @@ class Group(db.Model):
         self.name = name
 
 
-class Group_members(db.Model):
-    # Calendar types model
+# Calendar types model
+class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, ForeignKey("group.id"), nullable=False)
-    user_id = db.Column(db.Integer, ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.String(200), ForeignKey("user.ext_id"), nullable=False)
 
     def __init__(self, group_id, user_id, id=None):
         # initialize columns

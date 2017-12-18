@@ -1,2 +1,4 @@
 .idea/
 app/__pycache__/
+app/flask_oauth2_login/__pycache__/
+venv/
