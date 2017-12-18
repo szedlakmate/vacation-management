@@ -73,7 +73,6 @@ def login_success(token, profile):
         session['profile_email']=profile['email']
         session['profile_picture']=profile['picture']
         session['profile_ext_id']=str(profile['id'])
-        #session['profile_ext_id_hashed'] = hashID(profile['id'])
         return redirect('register')
 
 
@@ -86,16 +85,13 @@ def login_failure(e):
     return redirect(url_for('index'))
 
 
+# Query for Holiday events
 @app.route('/data')
 def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
-
-    #testdata = '[  {   "title": "New Year Eve",    "start": "2018-01-01"  },  {    "title": "Long Challenge",\n    "start": "2017-12-07",\n    "end": "2017-12-10"\n  },\n  {\n    "title": "Repeating Event",\n    "start": "2017-01-09T16:00:00-05:00"\n  },\n  {\n    "id": "999",\n    "title": "Repeating Event",\n    "start": "2017-01-16T16:00:00-05:00"\n  },\n  {\n    "title": "Codeforces",\n    "url": "http://codeforces.com/profile/sukeesh",\n    "start": "2017-01-11"\n  },\n  {\n    "title": "Meeting",\n    "start": "2017-01-12T10:30:00-05:00",\n    "end": "2017-01-12T12:30:00-05:00"\n  },\n  {\n    "title": "Lunch",\n    "start": "2017-01-12T12:00:00-05:00"\n  },\n  {\n    "title": "Meeting",\n    "start": "2017-01-12T14:30:00-05:00"\n  },\n  {\n    "title": "Happy Hour",\n    "start": "2017-01-12T17:30:00-05:00"\n  },\n  {\n    "title": "Dinner",\n    "start": "2017-01-12T20:00:00"\n  },\n  {\n    "title": "Birthday Party",\n    "start": "2017-01-13"\n  },\n  {\n    "title": "Github",\n    "url": "http://github.com/sukeesh",\n    "start": "2017-01-28"\n  }]'
-    #return testdata
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
     userid_filter = user.ext_id
-
     events = Holiday.query.filter((Holiday.user_id == userid_filter) &
                                   (~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
                                                                              ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
@@ -108,6 +104,21 @@ def return_data():
         })
     return jsonify(events_arr)
 
+# Query for Holiday events
+@app.route('/activateuser', methods=['GET', 'POST'])
+def activateuser():
+    if DEBUG:
+        pdb.set_trace()
+    user_id = request.form.get('id', '')
+    try:
+        user = User.query.filter(User.ext_id == user_id).first()
+        user.account_status = 1
+        db.session.commit()
+    except KeyError:
+        db.session.rollback()
+    except IntegrityError:
+        db.session.rollback()
+    return redirect("users")
 
 @app.route('/')
 def index():
@@ -175,7 +186,7 @@ def home():
 
 @app.route('/users')
 def users():
-    # Standard conditions *************************************
+    # Conditions *************************************
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -186,9 +197,8 @@ def users():
         return render_template("waitforapproval.html")
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
-    # End of standard conditions ******************************
-    return render_template("message.html",
-                        message="Hy!",
+    # End of conditions ******************************
+    return render_template("users.html",
                         avatar_url=user.avatar_url)
 
 
