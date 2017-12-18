@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables, hashID    # Functions
-from model import User, Calendar, ConfigData                             # Classes
+from model import ConfigData, User, Calendar, Holiday        # Classes
 from model import app as application
 from model import db
 
@@ -85,15 +85,29 @@ def login_failure(e):
         pass
     return redirect(url_for('index'))
 
-"""
+
 @app.route('/data')
 def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
 
-    with open("events.json", "r") as input_data:
-        return input_data.read()
-"""
+    #testdata = '[  {   "title": "New Year Eve",    "start": "2018-01-01"  },  {    "title": "Long Challenge",\n    "start": "2017-12-07",\n    "end": "2017-12-10"\n  },\n  {\n    "title": "Repeating Event",\n    "start": "2017-01-09T16:00:00-05:00"\n  },\n  {\n    "id": "999",\n    "title": "Repeating Event",\n    "start": "2017-01-16T16:00:00-05:00"\n  },\n  {\n    "title": "Codeforces",\n    "url": "http://codeforces.com/profile/sukeesh",\n    "start": "2017-01-11"\n  },\n  {\n    "title": "Meeting",\n    "start": "2017-01-12T10:30:00-05:00",\n    "end": "2017-01-12T12:30:00-05:00"\n  },\n  {\n    "title": "Lunch",\n    "start": "2017-01-12T12:00:00-05:00"\n  },\n  {\n    "title": "Meeting",\n    "start": "2017-01-12T14:30:00-05:00"\n  },\n  {\n    "title": "Happy Hour",\n    "start": "2017-01-12T17:30:00-05:00"\n  },\n  {\n    "title": "Dinner",\n    "start": "2017-01-12T20:00:00"\n  },\n  {\n    "title": "Birthday Party",\n    "start": "2017-01-13"\n  },\n  {\n    "title": "Github",\n    "url": "http://github.com/sukeesh",\n    "start": "2017-01-28"\n  }]'
+    #return testdata
+    user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
+    userid_filter = user.ext_id
+
+    events = Holiday.query.filter((Holiday.user_id == userid_filter) &
+                                  (~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+    events_arr = []
+    for event in events:
+        events_arr.append({
+            'title': event.note | 'alma',
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat()
+        })
+    return jsonify(events_arr)
+
 
 @app.route('/')
 def index():
