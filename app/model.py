@@ -51,7 +51,7 @@ class User(db.Model):
     ext_id = db.Column(db.String(200), unique=True, nullable=False) # XXX prefix should be added
     ext_id_hashed = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(50), unique=False, nullable=False)
-    nickname = db.Column(db.String(8), unique=True, nullable=False)
+    nickname = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     avatar_url = db.Column(db.String(200), unique=False, default="https://t3.ftcdn.net/jpg/00/64/67/52/240_F_64675209_7ve2XQANuzuHjMZXP3aIYIpsDKEbF5dD.jpg")
     birthday = db.Column(db.Date, unique=False, nullable=False)     # XXX Should be Nullable

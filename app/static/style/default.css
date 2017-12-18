@@ -37,6 +37,10 @@ a:hover {
     padding: 0;
 }
 
+.no-wrap {
+    white-space: nowrap;
+}
+
 #script-warning {
     display: none;
     background: #eee;

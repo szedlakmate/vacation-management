@@ -106,6 +106,7 @@ def index():
             return render_template("landing.html", login_url=google_login.authorization_url())
     except OperationalError:
         return redirect("reset")
+        # XXX Should be offered than to be default!
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -151,9 +152,30 @@ def home():
         session.clear()
         return redirect(url_for('index'))
     elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait until admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     # End of standard conditions ******************************
     return render_template("home.html", avatar_url=user.avatar_url)
+
+
+@app.route('/users')
+def users():
+    # Standard conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of standard conditions ******************************
+    return render_template("message.html",
+                        message="Hy!",
+                        avatar_url=user.avatar_url)
 
 
 @app.route('/logout')
