@@ -2,7 +2,7 @@ from flask import Flask, url_for, redirect, render_template, jsonify, session, r
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 #from flask_wtf import FlaskForm
 #from wtforms import StringField
@@ -99,10 +99,13 @@ def return_data():
 def index():
     if DEBUG:
         pdb.set_trace()
-    if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is not None):
-        return redirect('home')
-    else:
-        return render_template("landing.html", login_url=google_login.authorization_url())
+    try:
+        if (User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first() is not None):
+            return redirect('home')
+        else:
+            return render_template("landing.html", login_url=google_login.authorization_url())
+    except OperationalError:
+        return redirect("reset")
 
 
 @app.route('/register', methods=['GET', 'POST'])
