@@ -27,7 +27,7 @@ from flask_oauth2_login import GoogleLogin
 # To start debugging in docker-compose, run the container the following way:
 # docker-compose run --service-ports web
 DEBUG_Flask = True
-DEBUG = True
+DEBUG = False
 
 import pdb # XXX Should be excluded from final version
 
@@ -110,9 +110,12 @@ def activateuser():
     if DEBUG:
         pdb.set_trace()
     user_id = request.form.get('id', '')
+    action = request.form.get('action', '')
+    if action is None:
+        action = 1
     try:
         user = User.query.filter(User.ext_id == user_id).first()
-        user.account_status = 1
+        user.account_status = action
         db.session.commit()
     except KeyError:
         db.session.rollback()
@@ -143,9 +146,14 @@ def register():
         if not len(User.query.all()): # only active accounts shall be checked
             account_status = 1
             account_type = 2
-        profile = User(name=session['profile_name'], nickname=form.nickname.data, ext_id=session['profile_ext_id'],
-                       avatar_url=session['profile_picture'], email=session['profile_email'], birthday=form.birthday.data,
-                       account_status=account_status, account_type = account_type)
+        profile = User(name=session['profile_name'],
+                       nickname=form.nickname.data,
+                       ext_id=session['profile_ext_id'],
+                       avatar_url=session['profile_picture'],
+                       email=session['profile_email'],
+                       birthday=form.birthday.data,
+                       account_status=account_status,
+                       account_type = account_type)
         session['profile_ext_id_hashed'] = hashID(session['profile_ext_id'])
         session.pop('profile_ext_id')
         session.pop('profile_name')
@@ -201,8 +209,10 @@ def users():
     if DEBUG:
         pdb.set_trace()
     inactive = User.query.filter(User.account_status == 0).all()
+    active = User.query.filter((User.account_status == 1)).all()
+    current_ext_id = user.ext_id
     return render_template("users.html",
-                        avatar_url=user.avatar_url, inactive=inactive)
+                        avatar_url=user.avatar_url, inactive=inactive, active=active, current_ext_id=current_ext_id)
 
 
 @app.route('/logout')
