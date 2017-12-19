@@ -111,11 +111,17 @@ def activateuser():
         pdb.set_trace()
     user_id = request.form.get('id', '')
     action = request.form.get('action', '')
+    typechange = request.form.get ('typechange','')
+    if not user_id:
+        user_id = typechange
     if action is None:
         action = 1
     try:
         user = User.query.filter(User.ext_id == user_id).first()
-        user.account_status = action
+        if not typechange:
+            user.account_status = action
+        else:
+            user.account_type = (user.account_type + 1) % 3
         db.session.commit()
     except KeyError:
         db.session.rollback()
