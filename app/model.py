@@ -90,8 +90,11 @@ class Calendar(db.Model):
             self.id = id
         self.name = name
 
+    def __repr__(self):
+        return self.name
 
-# Calendar types model
+
+# Holiday data
 class Holiday(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(200), ForeignKey("user.ext_id"), nullable=False)
@@ -125,7 +128,7 @@ class Group(db.Model):
         self.name = name
 
 
-# Calendar types model
+# Group member data
 class GroupMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, ForeignKey("group.id"), nullable=False)

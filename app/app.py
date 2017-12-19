@@ -18,7 +18,7 @@ from model import ConfigData, User, Calendar, Holiday        # Classes
 from model import app as application
 from model import db
 
-from form import RegistrationForm
+from form import RegistrationForm, NewEventForm
 
 from flask_oauth2_login import GoogleLogin
 
@@ -196,6 +196,46 @@ def home():
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
     return render_template("home.html", avatar_url=user.avatar_url)
+
+
+@app.route('/newevent', methods=['GET', 'POST'])
+def newevent():
+    # Standard conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("message.html",
+                               message="Please wait until admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
+    # End of standard conditions ******************************
+    form = NewEventForm(request.form)
+    if request.method == 'POST' and form.validate():
+        calendar_id = None
+        if DEBUG:
+            pdb.set_trace()
+        event = Holiday(user_id=user.ext_id,
+                        calendar_id=form.calendar_list.data.id,
+                        start=form.start.data,
+                        end=form.end.data,
+                        note=form.note.data)
+        try:
+            db.session.add(event)
+            db.session.commit()
+            return redirect('home')
+        except KeyError:  # IntegrityError:
+            db.session.rollback()
+
+            return redirect(url_for('home'))
+        except IntegrityError:
+            db.session.rollback()
+
+            return redirect(url_for('home'))
+
+    return render_template('newevent.html', form=form)
 
 
 @app.route('/users')
