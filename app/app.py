@@ -99,6 +99,7 @@ def return_data():
     for event in events:
         events_arr.append({
             'title': event.note,
+            'url': event.url,
             'start': event.start.isoformat(),
             'end': event.end.isoformat()
         })
@@ -214,26 +215,39 @@ def newevent():
     # End of standard conditions ******************************
     form = NewEventForm(request.form)
     if request.method == 'POST' and form.validate():
-        calendar_id = None
-        if DEBUG:
-            pdb.set_trace()
+        calendar_id=form.calendar_list.data.id
+        start = form.start.data
+        end = form.end.data
+        note = form.note.data
         event = Holiday(user_id=user.ext_id,
-                        calendar_id=form.calendar_list.data.id,
-                        start=form.start.data,
-                        end=form.end.data,
-                        note=form.note.data)
+                        calendar_id=calendar_id,
+                        url='',
+                        start=start,
+                        end=end,
+                        note=note)
         try:
             db.session.add(event)
             db.session.commit()
-            return redirect('home')
+            try:
+                if DEBUG:
+                    pdb.set_trace()
+                event = Holiday.query.filter((Holiday.user_id == user.ext_id) &
+                                             (Holiday.calendar_id == calendar_id) &
+                                             (Holiday.start == start) &
+                                             (Holiday.end == end)).first()
+                event.url = '/event/' + str(event.id)
+                db.session.commit()
+            except AttributeError:
+                db.session.rollback()
+                #return redirect(url_for('home'))
+            return redirect(url_for('home'))
         except KeyError:  # IntegrityError:
             db.session.rollback()
-
             return redirect(url_for('home'))
         except IntegrityError:
             db.session.rollback()
-
             return redirect(url_for('home'))
+
 
     return render_template('newevent.html', form=form)
 

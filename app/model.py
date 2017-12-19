@@ -101,10 +101,11 @@ class Holiday(db.Model):
     calendar_id = db.Column(db.Integer, ForeignKey("calendar.id"), nullable=False)
     start = db.Column(db.Date, unique=False, nullable=False)
     end = db.Column(db.Date, unique=False, nullable=False)
+    url = db.Column(db.String(200), nullable=True)
     note = db.Column(db.String(15), unique=False, nullable=True)
     status = db.Column(db.Integer, unique=False, nullable=False, default = 0)
 
-    def __init__(self, user_id, calendar_id, start, end, id=None, note=None):
+    def __init__(self, user_id, calendar_id, start, end, id=None, note=None, url=None):
         # initialize columns
         if id:
             self.id = id
@@ -112,6 +113,8 @@ class Holiday(db.Model):
         self.calendar_id = calendar_id
         self.start = start
         self.end = end
+        if url:
+            self.url = url
         if note:
             self.note = note
 
