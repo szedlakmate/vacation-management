@@ -62,7 +62,7 @@
 		<input type="hidden" name="action" value="1"/>
 		<ul>
 			{% for user in inactive %}
-				<li>{{ user.name }} ({{ user.nickname }})<button name="id" value="{{ user.ext_id }}">Activate</button> </li>
+				<li>{{ user.name }} ({{ user.nickname }})<button name="id" value="{{ user.ext_id }}">Activate</button></li>
 			{% endfor %}
 			{% if inactive|length == 0 %}
 				There is no inactive user.
@@ -78,6 +78,17 @@
 			<li>{{ user.name }} ({{ user.nickname }})
 				{% if user.ext_id != current_ext_id %}
 					<button name="id" value="{{ user.ext_id }}">Inactivate</button>
+
+					<button name="typechange" value="{{ user.ext_id }}">
+						{% if user.account_type == 0 %}
+							Make Viewer
+						{% elif user.account_type == 1 %}
+							Make Admin
+						{% else %}
+							Make Standard
+						{% endif %}
+
+					</button>
 				{% else %}
 					[current user]
 				{% endif %} </li>
