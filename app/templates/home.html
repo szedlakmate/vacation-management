@@ -29,12 +29,15 @@
 				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
 				Vacation Manager
 			</a>
+			{% if account_type != 1 %}
 			<a class="nav-item" href="/newevent">
 				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
 			</a>
+			{% endif %}
 		</div>
 
 		<div class="no-wrap">
+			{% if account_type != 1 %}
 			<a class="d-inline" href="/calendars">
 				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
 			</a>
@@ -46,6 +49,7 @@
 			<a class="d-inline" href="/users">
 				Users
 			</a>
+			{% endif %}
 
 			<a class="d-inline avatar" href="/profile">
 				<img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
