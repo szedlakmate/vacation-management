@@ -1,5 +1,6 @@
 from datetime import timedelta
-from flask import Flask, url_for, redirect, render_template, jsonify, session, request, flash
+from flask import Flask, url_for, redirect, render_template, jsonify, session, request
+from flask_mail import Mail, Message
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
@@ -47,12 +48,15 @@ def appConfig():
     )
     app.config["GOOGLE_LOGIN_CLIENT_ID"] = ConfigData.GOOGLE_LOGIN_CLIENT_ID
     app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = ConfigData.GOOGLE_LOGIN_CLIENT_SECRET
+    app.config.from_pyfile('email.cfg')
 
 
 # Initialize web app
 app = Flask(__name__, static_url_path='/code/app/static')
 appConfig()
 google_login = GoogleLogin(app)
+mail = Mail()
+mail.init_app(app)
 
 
 # ****************************************
@@ -96,6 +100,15 @@ def getevents(start_date, end_date, user, get_all):
     else:
         events = all_events.filter(Holiday.user_id == user.ext_id).all()
     return events
+
+
+@app.route('/mail')
+def trymail(): # "Dear %s,\n\nYour Vacation Management account was activated.\n\nBest regards,\nThe VM Team" % "Máté"
+    msg = Message("Hello World",
+                  sender="demo.szedlak@gmail.com",
+                  recipients=["szedlakmate@gmail.com"])
+    mail.send(msg)
+    return "Mail sent"
 
 
 # Query for Holiday events
@@ -148,15 +161,28 @@ def activateuser():
         user_id = typechange
     if action is None:
         action = 1
+    else:
+        try:
+            action = int(action)
+        except Exception:
+            pass
     try:
         user = User.query.filter(User.ext_id == user_id).first()
         if not typechange:
             user.account_status = action
+            if action == 1:
+
+                msg = Message("Account activation",
+                              sender="noreply@example.com",
+                              recipients=[user.email])
+                msg.body = "Dear %s,\n\nYour Vacation Management account is now active.\n\nBest regards,\nThe VM Team" % user.nickname
+                mail.send(msg)
         else:
             user.account_type = (user.account_type + 1) % 3
         db.session.commit()
     except KeyError:
         db.session.rollback()
+        return redirect("users")
     except IntegrityError:
         db.session.rollback()
     return redirect("users")
