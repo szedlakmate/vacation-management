@@ -196,7 +196,7 @@ def home():
                                message="Please wait until admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
-    return render_template("home.html", avatar_url=user.avatar_url)
+    return render_template("home.html", avatar_url=user.avatar_url, account_type= user.account_type)
 
 
 @app.route('/newevent', methods=['GET', 'POST'])
@@ -249,7 +249,7 @@ def newevent():
             return redirect(url_for('home'))
 
 
-    return render_template('newevent.html', form=form)
+    return render_template('newevent.html', form=form, account_type= user.account_type)
 
 
 @app.route('/users')
@@ -272,7 +272,56 @@ def users():
     active = User.query.filter((User.account_status == 1)).all()
     current_ext_id = user.ext_id
     return render_template("users.html",
-                        avatar_url=user.avatar_url, inactive=inactive, active=active, current_ext_id=current_ext_id)
+                        avatar_url=user.avatar_url, account_type= user.account_type, inactive=inactive, active=active, current_ext_id=current_ext_id)
+
+
+@app.route('/event/<event_id>', methods=['GET', 'POST'])
+def eventedit(event_id):
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    if DEBUG:
+        pdb.set_trace()
+    event = Holiday.query.filter(Holiday.id == event_id).first()
+    event_user = User.query.filter(User.ext_id == event.user_id).first()
+
+    if not event.note:
+        note = ""
+    else:
+        note = event.note
+
+    event_allow = None
+    try:
+        event_allow = int(request.form.get('allow', ''))
+    except ValueError:
+        event_allow = None
+    if event_allow == 0 or event_allow == 1:
+        event.status = event_allow
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+
+    return render_template("eventedit.html",
+                           avatar_url=user.avatar_url,
+                           account_type=user.account_type,
+                           username=event_user.nickname,
+                           calendar_name=Calendar.query.filter(Calendar.id == event.calendar_id).first().name,
+                           start=event.start,
+                           end=event.end,
+                           note=note,
+                           status=event.status
+                        )
 
 
 @app.route('/logout')

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/default.css') }}">
+
+    <!-- CALENDAR -->
+    <link href="{{ url_for('static', filename='style/fullcalendar.min.css') }}" rel='stylesheet' />
+    <link href="{{ url_for('static', filename='style/font-awesome-4.7.0/css/font-awesome.min.css') }}" rel='stylesheet' />
+    <link href="{{ url_for('static', filename='style/fullcalendar.print.css') }}" rel='stylesheet' media='print' />
+    <script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+
+    <!--script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script-->
+    <script src="{{ url_for('static', filename='js/fullcalendar.min.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
+    <!-- END CALENDAR -->
+
+
+
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="no-wrap">
+            <a class="navbar-brand no-padding"  href="/home">
+                <img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
+                Vacation Manager
+            </a>
+            <a class="nav-item" href="/newevent">
+                <img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
+            </a>
+        </div>
+
+        <div class="no-wrap">
+            <a class="d-inline" href="/calendars">
+                <img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
+            </a>
+
+            <a class="d-inline" href="/groups">
+                Groups
+            </a>
+
+            <a class="d-inline" href="/users">
+                Users
+            </a>
+
+            <a class="d-inline avatar" href="/profile">
+                <img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
+            </a>
+
+            <a class="d-inline" href="/logout">
+                <img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="30" height="30" class="d-inline-block align-top" alt="">
+            </a>
+        </div>
+    </nav>
+    <div>
+        <form action="" method="post">
+            {{ username }} - {{ calendar_name }} -  {{ start }} - {{ end }}{% if note != "" %} -  {{ note }}{% endif %} - {% if status == 1 %}Allowed{% else %}Denied{% endif %} - <button name="allow" value="1">Allow</button> <button name="allow" value="0">Deny</button>
+        </form>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+</body>
+</html>
