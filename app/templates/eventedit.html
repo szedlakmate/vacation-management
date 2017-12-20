@@ -63,9 +63,9 @@
             {% if account_type == 2 %}
                 {% if status != 1 %}<button name="allow" value="1">Allow</button>{% endif %}
                 {% if status != -1 %}<button name="allow" value="-1">Deny</button>{% endif %}
-            {% elif account_type == 0 %}
-                {% if status == 0 %}<button name="allow" value="-2">Delete</button>{% endif %}
             {% endif %}
+            {% if status == 0 %}<button name="allow" value="-2">Delete</button>{% endif %}
+
         </form>
 
     </div>
