@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, url_for, redirect, render_template, jsonify, session, request, flash
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
@@ -89,11 +90,11 @@ def login_failure(e):
 
 def getevents(start_date, end_date, user, get_all):
     all_events = Holiday.query.filter((~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
-                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date)))))
     if user.account_type > 0 and get_all:
-        events = all_events
+        events = all_events.all()
     else:
-        events = all_events.filter(Holiday.user_id == user.ext_id)
+        events = all_events.filter(Holiday.user_id == user.ext_id).all()
     return events
 
 
@@ -103,7 +104,6 @@ def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
-
     get_all = True
     events = getevents(start_date, end_date, user, get_all)
     events_arr = []
@@ -111,6 +111,8 @@ def return_data():
         eventcolor = ''
         style = ''
         if event.status == 0:
+            style += 'redborder'
+        elif event.status == -1:
             style += 'light'
         if event.user_id == user.ext_id:
             eventcolor += 'default'
@@ -125,12 +127,11 @@ def return_data():
             title = user.nickname
         if event.note:
             title += '-' + event.note
-
         events_arr.append({
             'title': title,
             'url': event.url,
             'start': event.start.isoformat(),
-            'end': event.end.isoformat(),
+            'end': (event.end + timedelta(days=1)).isoformat(),
             'style': style
         })
     return jsonify(events_arr)
@@ -311,17 +312,18 @@ def eventedit(event_id):
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    event = Holiday.query.filter(Holiday.id == event_id).first()
     if (user is None):
         session.clear()
         return redirect(url_for('index'))
     elif (user.account_status == 0):
         return render_template("waitforapproval.html")
-    elif (user.account_type != 2):
-        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    elif (user.account_type < 1) and (event.user_id != user.ext_id) and (event.status != 0):
+        return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
     # End of conditions ******************************
     if DEBUG:
         pdb.set_trace()
-    event = Holiday.query.filter(Holiday.id == event_id).first()
+
     event_user = User.query.filter(User.ext_id == event.user_id).first()
 
     if not event.note:
@@ -334,8 +336,11 @@ def eventedit(event_id):
         event_allow = int(request.form.get('allow', ''))
     except ValueError:
         event_allow = None
-    if event_allow == 0 or event_allow == 1:
-        event.status = event_allow
+    if event_allow:
+        if event_allow == -1 or event_allow == 1:
+            event.status = event_allow
+        if event_allow == -2:
+            db.session.delete(event)
         try:
             db.session.commit()
             return redirect('home')
@@ -352,7 +357,7 @@ def eventedit(event_id):
                            end=event.end,
                            note=note,
                            status=event.status
-                        )
+                           )
 
 
 @app.route('/logout')
