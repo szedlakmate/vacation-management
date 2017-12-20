@@ -57,44 +57,10 @@
         </div>
     </nav>
     <div>
-    <h3>Inactive Users</h3>
-    <form action="/activateuser" method="post">
-        <input type="hidden" name="action" value="1"/>
-        <ul>
-            {% for user in inactive %}
-                <li>{{ user.name }} ({{ user.nickname }})<button name="id" value="{{ user.ext_id }}">Activate</button></li>
-            {% endfor %}
-            {% if inactive|length == 0 %}
-                There is no inactive user.
+        <form action="" method="post">
+            {{ username }} - {{ calendar_name }} -  {{ start }} - {{ end }}{% if note != "" %} -  {{ note }}{% endif %} - {% if status == 1 %}Allowed{% else %}Denied{% endif %} - <button name="allow" value="1">Allow</button> <button name="allow" value="0">Deny</button>
+        </form>
 
-            {% endif %}
-        </ul>
-    </form>
-    <h3>Active Users</h3>
-    <form action="/activateuser" method="post">
-        <input type="hidden" name="action" value="0"/>
-        <ul>
-            {% for user in active %}
-            <li>{{ user.name }} ({{ user.nickname }})
-                {% if user.ext_id != current_ext_id %}
-                    <button name="id" value="{{ user.ext_id }}">Inactivate</button>
-
-                    <button name="typechange" value="{{ user.ext_id }}">
-                        {% if user.account_type == 0 %}
-                            Make Viewer
-                        {% elif user.account_type == 1 %}
-                            Make Admin
-                        {% else %}
-                            Make Standard
-                        {% endif %}
-
-                    </button>
-                {% else %}
-                    [current user]
-                {% endif %} </li>
-            {% endfor %}
-        </ul>
-    </form>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

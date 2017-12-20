@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, render_template, jsonify, session, request
+from flask import Flask, url_for, redirect, render_template, jsonify, session, request, flash
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
@@ -31,6 +31,8 @@ DEBUG = False
 
 import pdb # XXX Should be excluded from final version
 
+
+COLORMAP = ['green', 'cornflowerblue', 'yellow', 'red', 'amber', 'purple'] # Must be in sync with the default.css file!!!!
 
 def appConfig():
     AppConfig(app, configfile=None)
@@ -85,22 +87,51 @@ def login_failure(e):
     return redirect(url_for('index'))
 
 
+def getevents(start_date, end_date, user, get_all):
+    all_events = Holiday.query.filter((~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+    if user.account_type > 0 and get_all:
+        events = all_events
+    else:
+        events = all_events.filter(Holiday.user_id == user.ext_id)
+    return events
+
+
 # Query for Holiday events
 @app.route('/data')
 def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
-    userid_filter = user.ext_id
-    events = Holiday.query.filter((Holiday.user_id == userid_filter) &
-                                  (~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
-                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+
+    get_all = True
+    events = getevents(start_date, end_date, user, get_all)
     events_arr = []
     for event in events:
+        eventcolor = ''
+        style = ''
+        if event.status == 0:
+            style += 'light'
+        if event.user_id == user.ext_id:
+            eventcolor += 'default'
+        else:
+            eventcolor += COLORMAP[(int(user.ext_id_hashed)) % len(COLORMAP)]
+        if style and eventcolor:
+            style += " "
+        if eventcolor:
+            style += eventcolor
+        title = ''
+        if not event.user_id == user.ext_id:
+            title = user.nickname
+        if event.note:
+            title += '-' + event.note
+
         events_arr.append({
-            'title': event.note,
+            'title': title,
+            'url': event.url,
             'start': event.start.isoformat(),
-            'end': event.end.isoformat()
+            'end': event.end.isoformat(),
+            'style': style
         })
     return jsonify(events_arr)
 
@@ -146,10 +177,10 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if (request.method == 'POST' and form.validate() and form.post_validate()):
         account_status = None
         account_type = None
-        if not len(User.query.all()): # only active accounts shall be checked
+        if not len(User.query.filter(User.account_status == 1).all()):
             account_status = 1
             account_type = 2
         profile = User(name=session['profile_name'],
@@ -195,7 +226,7 @@ def home():
                                message="Please wait until admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
-    return render_template("home.html", avatar_url=user.avatar_url)
+    return render_template("home.html", avatar_url=user.avatar_url, account_type= user.account_type)
 
 
 @app.route('/newevent', methods=['GET', 'POST'])
@@ -214,28 +245,41 @@ def newevent():
     # End of standard conditions ******************************
     form = NewEventForm(request.form)
     if request.method == 'POST' and form.validate():
-        calendar_id = None
-        if DEBUG:
-            pdb.set_trace()
+        calendar_id=form.calendar_list.data.id
+        start = form.start.data
+        end = form.end.data
+        note = form.note.data
         event = Holiday(user_id=user.ext_id,
-                        calendar_id=form.calendar_list.data.id,
-                        start=form.start.data,
-                        end=form.end.data,
-                        note=form.note.data)
+                        calendar_id=calendar_id,
+                        url='',
+                        start=start,
+                        end=end,
+                        note=note)
         try:
             db.session.add(event)
             db.session.commit()
-            return redirect('home')
+            try:
+                if DEBUG:
+                    pdb.set_trace()
+                event = Holiday.query.filter((Holiday.user_id == user.ext_id) &
+                                             (Holiday.calendar_id == calendar_id) &
+                                             (Holiday.start == start) &
+                                             (Holiday.end == end)).first()
+                event.url = '/event/' + str(event.id)
+                db.session.commit()
+            except AttributeError:
+                db.session.rollback()
+                #return redirect(url_for('home'))
+            return redirect(url_for('home'))
         except KeyError:  # IntegrityError:
             db.session.rollback()
-
             return redirect(url_for('home'))
         except IntegrityError:
             db.session.rollback()
-
             return redirect(url_for('home'))
 
-    return render_template('newevent.html', form=form)
+
+    return render_template('newevent.html', form=form, account_type= user.account_type)
 
 
 @app.route('/users')
@@ -258,7 +302,57 @@ def users():
     active = User.query.filter((User.account_status == 1)).all()
     current_ext_id = user.ext_id
     return render_template("users.html",
-                        avatar_url=user.avatar_url, inactive=inactive, active=active, current_ext_id=current_ext_id)
+                        avatar_url=user.avatar_url, account_type= user.account_type, inactive=inactive, active=active, current_ext_id=current_ext_id)
+
+
+@app.route('/event/<event_id>', methods=['GET', 'POST'])
+def eventedit(event_id):
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    if DEBUG:
+        pdb.set_trace()
+    event = Holiday.query.filter(Holiday.id == event_id).first()
+    event_user = User.query.filter(User.ext_id == event.user_id).first()
+
+    if not event.note:
+        note = ""
+    else:
+        note = event.note
+
+    event_allow = None
+    try:
+        event_allow = int(request.form.get('allow', ''))
+    except ValueError:
+        event_allow = None
+    if event_allow == 0 or event_allow == 1:
+        event.status = event_allow
+        try:
+            db.session.commit()
+            return redirect('home')
+        except Exception:
+            db.session.rollback()
+
+
+    return render_template("eventedit.html",
+                           avatar_url=user.avatar_url,
+                           account_type=user.account_type,
+                           username=event_user.nickname,
+                           calendar_name=Calendar.query.filter(Calendar.id == event.calendar_id).first().name,
+                           start=event.start,
+                           end=event.end,
+                           note=note,
+                           status=event.status
+                        )
 
 
 @app.route('/logout')
