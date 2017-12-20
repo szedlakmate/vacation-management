@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, render_template, jsonify, session, request
+from flask import Flask, url_for, redirect, render_template, jsonify, session, request, flash
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
@@ -147,10 +147,10 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if (request.method == 'POST' and form.validate() and form.post_validate()):
         account_status = None
         account_type = None
-        if not len(User.query.all()): # only active accounts shall be checked
+        if not len(User.query.filter(User.account_status == 1).all()):
             account_status = 1
             account_type = 2
         profile = User(name=session['profile_name'],
