@@ -32,6 +32,8 @@ DEBUG = False
 import pdb # XXX Should be excluded from final version
 
 
+COLORMAP = ['green', 'cornflowerblue', 'yellow', 'red', 'amber', 'purple'] # Must be in sync with the default.css file!!!!
+
 def appConfig():
     AppConfig(app, configfile=None)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   # Suggested by SQLAlchemy
@@ -85,23 +87,51 @@ def login_failure(e):
     return redirect(url_for('index'))
 
 
+def getevents(start_date, end_date, user, get_all):
+    all_events = Holiday.query.filter((~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+    if user.account_type > 0 and get_all:
+        events = all_events
+    else:
+        events = all_events.filter(Holiday.user_id == user.ext_id)
+    return events
+
+
 # Query for Holiday events
 @app.route('/data')
 def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
-    userid_filter = user.ext_id
-    events = Holiday.query.filter((Holiday.user_id == userid_filter) &
-                                  (~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
-                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+
+    get_all = True
+    events = getevents(start_date, end_date, user, get_all)
     events_arr = []
     for event in events:
+        eventcolor = ''
+        style = ''
+        if event.status == 0:
+            style += 'light'
+        if event.user_id == user.ext_id:
+            eventcolor += 'default'
+        else:
+            eventcolor += COLORMAP[(int(user.ext_id_hashed)) % len(COLORMAP)]
+        if style and eventcolor:
+            style += " "
+        if eventcolor:
+            style += eventcolor
+        title = ''
+        if not event.user_id == user.ext_id:
+            title = user.nickname
+        if event.note:
+            title += '-' + event.note
+
         events_arr.append({
-            'title': event.note,
+            'title': title,
             'url': event.url,
             'start': event.start.isoformat(),
-            'end': event.end.isoformat()
+            'end': event.end.isoformat(),
+            'style': style
         })
     return jsonify(events_arr)
 
@@ -308,6 +338,7 @@ def eventedit(event_id):
         event.status = event_allow
         try:
             db.session.commit()
+            return redirect('home')
         except Exception:
             db.session.rollback()
 

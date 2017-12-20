@@ -69,3 +69,43 @@ a:hover {
     margin: 10px auto;
     padding: 0 10px;
 }
+
+/* COLORMAP # Must be in sync with the app.py file - COLORMAP array !!!! */
+.light {
+    opacity: 0.5;
+}
+
+.default {
+    border: 1px solid #3a87ad;
+    background-color: #3a87ad;
+}
+
+.green {
+    border: 1px solid green;
+    background-color: green;
+}
+
+.cornflowerblue {
+    border: 1px solid cornflowerblue;
+    background-color: cornflowerblue;
+}
+
+.yellow {
+    border: 1px solid #ccb400;
+    background-color: #ccb400;
+}
+
+.red {
+    border: 1px solid red;
+    background-color: red;
+}
+
+.amber {
+    border: 1px solid #a57f00;
+    background-color: #a57f00;
+}
+
+.purple {
+    border: 1px solid #6500a5;
+    background-color: #6500a5;
+}
