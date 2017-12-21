@@ -28,7 +28,7 @@ class ConfigData():
     SECRET_KEY = 'secret'
 
 BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
-BASECALENDARS = [{'id':1, 'name':'Normal holiday'},{'id':2, 'name':'Sick-leave'}]
+BASECALENDARS = [{'id':1, 'name':'Normal holiday', 'free_days':20},{'id':2, 'name':'Sick-leave'}]
 # XXX Need to be read from config file
 
 
@@ -83,11 +83,14 @@ class User(db.Model):
 class Calendar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    free_days = db.Column(db.Integer, default=-1, nullable=False, unique=False)
 
-    def __init__(self, name, id=None):
+    def __init__(self, name, id=None, free_days=None):
         # initialize columns
         if id:
             self.id = id
+        if free_days:
+            self.free_days = free_days
         self.name = name
 
     def __repr__(self):
