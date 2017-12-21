@@ -54,17 +54,37 @@
         </div>
     </nav>
     <div>
-	{% from "_formhelpers.html" import render_field %}
-	<form method=post>
-		<dl>
-			{{ render_field(form.calendar_list) }}
-			{{ render_field(form.start) }}
-			{{ render_field(form.end) }}
-            {{ render_field(form.note) }}
-		</dl>
-		<p><input type=submit value=Register>
-	</form>
 
+        <form action="/groups/{{ group.id }}" method="post">
+                <input type="text" name="new_name" value="{{ group.name }}"> <button name="action" value="rename">Rename</button> <button name="action" value="cancel">Cancel</button> <button name="action" value="delete">Delete</button>
+        </form>
+    </div>
+
+    <div>
+    <h3>Members</h3>
+    <form action="/activateuser" method="post">
+        <input type="hidden" name="action" value="0"/>
+        <ul>
+            {% for user in member %}
+            <li>{{ user.name }} ({{ user.nickname }}) <button name="id" value="{{ user.ext_id }}">Remove</button></li>
+            {% endfor %}
+            {% if member|length == 0 %}
+                There is no member.
+            {% endif %}
+        </ul>
+    </form>
+    <h3>Others</h3>
+    <form action="/activateuser" method="post">
+        <input type="hidden" name="action" value="1"/>
+        <ul>
+            {% for user in outer %}
+                <li>{{ user.name }} ({{ user.nickname }}) <button name="id" value="{{ user.ext_id }}">Add</button></li>
+            {% endfor %}
+            {% if outer|length == 0 %}
+                There is no other user.
+            {% endif %}
+        </ul>
+    </form>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

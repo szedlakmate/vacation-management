@@ -71,15 +71,16 @@
 
         <ul>
             {% for group in groups %}
-            <form action="/groups/all" method="post">
-                <input type="hidden" name="id" value="{{ group.id }}"/>
-                <li>{{ rename }}{% if rename %}<input type="text" name="new_name">{% else %}{{ group.name }}{% endif %} <button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button></li>
+            <form action="/groups/{{ group.id }}" method="post">
+                <li>{{ group.name }}<button name="id" value="{{ group.id }}">Edit</button></li>
             </form>
             {% endfor %}
             {% if groups|length == 0 %}
                 There is no group defined.
             {% endif %}
         </ul>
+
+        <button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button>
 
     </div>
 

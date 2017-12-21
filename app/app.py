@@ -404,8 +404,8 @@ def profile():
     return redirect("home")
 
 
-@app.route('/groups/<id_edit>', methods=['GET', 'POST'])
-def groups(id_edit):
+@app.route('/groups')
+def groups():
     # Conditions *************************************
     if DEBUG:
         pdb.set_trace()
@@ -418,23 +418,44 @@ def groups(id_edit):
     elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
+
     groups = Group.query.all()
-    action = ""
+    return render_template("groups.html", avatar_url=user.avatar_url, groups=groups)
 
-    action = request.args.get('action', '')
-    if id_edit == "all":
-        if action == '':
-            return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename=action, id=None)
-        elif action == 'rename':
-            return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename="1", id=id)
+
+@app.route('/groups/<id>', methods=['GET', 'POST'])
+def group_edit(id):
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if user is None:
+        session.clear()
+        return redirect(url_for('index'))
+    elif user.account_status == 0:
+        return render_template("waitforapproval.html")
+    elif user.account_type != 2:
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    action = request.values.get('action', '')
+    if action:
+        name = request.values.get('new_name', '')
+        return redirect('/groups')
+    group = Group.query.filter(Group.id == id).first()
+    if not group:
+        return redirect('/groups')
     else:
-        return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename=False, id=id)
+        member = []
+        outer = []
+        for user in User.query.all():
+            if True:
+                member.append(user)
+            else:
+                outer.append(user)
 
-'''
-@app.route('/groups/')
-def groups_redirect():
-    return redirect('/groups/all')
-'''
+        pdb.set_trace()
+        return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
+
 
 @app.route('/calendars')
 def calendars():
