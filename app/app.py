@@ -15,8 +15,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 # *************************************************
 
 # DB model functions and classes
-from model import createDB, setupDB, createTables, hashID    # Functions
-from model import ConfigData, User, Calendar, Holiday        # Classes
+from model import createDB, setupDB, createTables, hashID                   # Functions
+from model import ConfigData, User, Calendar, Holiday, GroupMember, Group   # Classes
 from model import app as application
 from model import db
 
@@ -404,8 +404,8 @@ def profile():
     return redirect("home")
 
 
-@app.route('/groups')
-def groups():
+@app.route('/groups/<id>', methods=['GET', 'POST'])
+def groups(id=None):
     # Conditions *************************************
     if DEBUG:
         pdb.set_trace()
@@ -418,26 +418,14 @@ def groups():
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
+    if id == "all":
+        groups = Group.query.all()
+        return render_template("groups.html", avatar_url=user.avatar_url, groups=groups)
+    else:
+        CONTINUEFROMTHIS
+        event_allow = int(request.form.get('allow', ''))
+        return redirect("/groups/all")
 
-    return render_template("groups.html", avatar_url=user.avatar_url)
-
-
-@app.route('/newgroup')
-def newgroup():
-    # Conditions *************************************
-    if DEBUG:
-        pdb.set_trace()
-    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
-    if (user is None):
-        session.clear()
-        return redirect(url_for('index'))
-    elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
-    elif (user.account_type != 2):
-        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
-    # End of conditions ******************************
-
-    return render_template("newgroup.html", avatar_url=user.avatar_url)
 
 
 @app.route('/calendars')

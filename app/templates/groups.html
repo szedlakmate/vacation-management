@@ -39,7 +39,7 @@
                 <img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
             </a>
 
-            <a class="d-inline" href="/groups">
+            <a class="d-inline" href="/groups/all">
                 Groups
             </a>
 
@@ -65,20 +65,24 @@
 
 
     <div>
-    <h3>User Groups</h3>
-    <form action="/activateuser" method="post">
-        <input type="hidden" name="action" value="1"/>
-        <ul>
-            {% for user in inactive %}
-                <li>{{ user.name }} ({{ user.nickname }})<button name="id" value="{{ user.ext_id }}">Activate</button></li>
-            {% endfor %}
-            {% if inactive|length == 0 %}
-                There is no inactive user.
 
+    <h3>User Groups</h3>
+
+
+        <ul>
+            {% for group in groups %}
+            <form action="/groups/{{ group.id }}" method="post">
+                <li>{{ group.name }}<button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button></li>
+            </form>
+            {% endfor %}
+            {% if groups|length == 0 %}
+                There is no group defined.
             {% endif %}
         </ul>
-    </form>
+
+
     <h3>Active Users</h3>
+
     <form action="/activateuser" method="post">
         <input type="hidden" name="action" value="0"/>
         <ul>
@@ -103,6 +107,7 @@
             {% endfor %}
         </ul>
     </form>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
