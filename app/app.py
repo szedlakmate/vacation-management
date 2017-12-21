@@ -339,12 +339,15 @@ def eventedit(event_id):
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
     event = Holiday.query.filter(Holiday.id == event_id).first()
-    if (user is None):
-        session.clear()
-        return redirect(url_for('index'))
-    elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
-    elif (user.account_type < 1) and (event.user_id != user.ext_id) and (event.status != 0):
+    try:
+        if (user is None):
+            session.clear()
+            return redirect(url_for('index'))
+        elif (user.account_status == 0):
+            return render_template("waitforapproval.html")
+        elif (user.account_type < 1) and (event.user_id != user.ext_id) and (event.status != 0):
+            return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
+    except AttributeError:
         return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
     # End of conditions ******************************
     if DEBUG:
