@@ -418,7 +418,8 @@ def groups():
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
-    return redirect("home")
+
+    return render_template("groups.html")
 
 
 @app.route('/calendars')
