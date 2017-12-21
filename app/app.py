@@ -448,12 +448,12 @@ def group_edit(id):
         member = []
         outer = []
         for user in User.query.all():
-            if True:
+            if GroupMember.query.filter(GroupMember.group_id == id).all():
                 member.append(user)
             else:
                 outer.append(user)
-
-        pdb.set_trace()
+        # member.sort()
+        # outer.sort()
         return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
 
 
