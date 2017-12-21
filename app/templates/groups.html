@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VM - Users</title>
+    <title>VM - User Groups</title>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -71,42 +71,15 @@
 
         <ul>
             {% for group in groups %}
-            <form action="/groups/{{ group.id }}" method="post">
-                <li>{{ group.name }}<button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button></li>
+            <form action="/groups/all" method="post">
+                <input type="hidden" name="id" value="{{ group.id }}"/>
+                <li>{{ rename }}{% if rename %}<input type="text" name="new_name">{% else %}{{ group.name }}{% endif %} <button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button></li>
             </form>
             {% endfor %}
             {% if groups|length == 0 %}
                 There is no group defined.
             {% endif %}
         </ul>
-
-
-    <h3>Active Users</h3>
-
-    <form action="/activateuser" method="post">
-        <input type="hidden" name="action" value="0"/>
-        <ul>
-            {% for user in active %}
-            <li>{{ user.name }} ({{ user.nickname }})
-                {% if user.ext_id != current_ext_id %}
-                    <button name="id" value="{{ user.ext_id }}">Inactivate</button>
-
-                    <button name="typechange" value="{{ user.ext_id }}">
-                        {% if user.account_type == 0 %}
-                            Make Viewer
-                        {% elif user.account_type == 1 %}
-                            Make Admin
-                        {% else %}
-                            Make Standard
-                        {% endif %}
-
-                    </button>
-                {% else %}
-                    [current user]
-                {% endif %} </li>
-            {% endfor %}
-        </ul>
-    </form>
 
     </div>
 

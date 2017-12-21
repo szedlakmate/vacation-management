@@ -404,29 +404,37 @@ def profile():
     return redirect("home")
 
 
-@app.route('/groups/<id>', methods=['GET', 'POST'])
-def groups(id=None):
+@app.route('/groups/<id_edit>', methods=['GET', 'POST'])
+def groups(id_edit):
     # Conditions *************************************
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
-    if (user is None):
+    if user is None:
         session.clear()
         return redirect(url_for('index'))
-    elif (user.account_status == 0):
+    elif user.account_status == 0:
         return render_template("waitforapproval.html")
-    elif (user.account_type != 2):
+    elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
-    if id == "all":
-        groups = Group.query.all()
-        return render_template("groups.html", avatar_url=user.avatar_url, groups=groups)
+    groups = Group.query.all()
+    action = ""
+
+    action = request.args.get('action', '')
+    if id_edit == "all":
+        if action == '':
+            return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename=action, id=None)
+        elif action == 'rename':
+            return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename="1", id=id)
     else:
-        CONTINUEFROMTHIS
-        event_allow = int(request.form.get('allow', ''))
-        return redirect("/groups/all")
+        return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, rename=False, id=id)
 
-
+'''
+@app.route('/groups/')
+def groups_redirect():
+    return redirect('/groups/all')
+'''
 
 @app.route('/calendars')
 def calendars():
