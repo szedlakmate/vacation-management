@@ -419,7 +419,25 @@ def groups():
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
 
-    return render_template("groups.html")
+    return render_template("groups.html", avatar_url=user.avatar_url)
+
+
+@app.route('/newgroup')
+def newgroup():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+
+    return render_template("newgroup.html", avatar_url=user.avatar_url)
 
 
 @app.route('/calendars')

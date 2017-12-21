@@ -57,6 +57,14 @@ a:hover {
     color: red;
 }
 
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
+
 #loading {
     display: none;
     position: absolute;
