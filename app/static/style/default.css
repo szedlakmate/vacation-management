@@ -115,6 +115,12 @@ a:hover {
     background-color: #6500a5;
 }
 
+.pink {
+    border: 1px solid #f25eca;
+    background-color: #f25eca;
+}
+
+
 .light {
     opacity: 0.5;
 }

@@ -31,7 +31,7 @@ DEBUG = False
 import pdb # XXX Should be excluded from final version
 
 
-COLORMAP = ['green', 'cornflowerblue', 'yellow', 'red', 'amber', 'purple'] # Must be in sync with the default.css file!!!!
+COLORMAP = ['green', 'cornflowerblue', 'yellow', 'red', 'amber', 'purple', 'pink'] # Must be in sync with the default.css file!!!!
 
 def appConfig():
     AppConfig(app, configfile=None)
@@ -127,14 +127,17 @@ def return_data():
         if event.user_id == user.ext_id:
             eventcolor += 'default'
         else:
-            eventcolor += COLORMAP[(int(user.ext_id_hashed)) % len(COLORMAP)]
+            eventcolor += COLORMAP[int((User.query.filter(User.ext_id == event.user_id).first().ext_id_hashed)) % len(COLORMAP)]
         if style and eventcolor:
             style += " "
         if eventcolor:
             style += eventcolor
         title = ''
         if event.user_id:
-            title += str(User.query.filter(User.ext_id == event.user_id).first().nickname)
+            if user.account_type > 0:
+                title += str(User.query.filter(User.ext_id == event.user_id).first().nickname)
+            else:
+                title += str(Calendar.query.filter(Calendar.id == event.calendar_id).first().name)
         if event.note:
             title += '-' + event.note
         events_arr.append({
