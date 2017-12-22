@@ -60,7 +60,7 @@
 
         <form action="/newcalendar" method="post">
                 {% if calendar != None %}<input type="hidden" name="calendar_id" value="{{ calendar.id }}"/>{% endif %}
-                <input type="text" name="new_name" {% if calendar != None %} value="{{ calendar.name }}" {% endif %}> {% if calendar == None %}<button name="calendar_action" value="add">Add</button>{% else %}<button name="calendar_action" value="rename">Rename</button>{% endif %} <button name="calendar_action" value="cancel">Cancel</button>{% if calendar != None %} <button name="calendar_action" value="delete">Delete</button>{% endif %}
+                <input type="text" name="new_name" {% if calendar != None %} value="{{ calendar.name }}" {% endif %}> {% if calendar == None %}<button name="calendar_action" value="add">Add</button>{% else %}<button name="calendar_action" value="rename">Rename</button>{% endif %} <button name="calendar_action" value="cancel">Cancel</button>{% if calendar != None %}{% if calendar.id != 1 %} <button name="calendar_action" value="delete">Delete</button>{% endif %}{% endif %}
         </form>
     </div>
 

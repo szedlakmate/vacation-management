@@ -574,6 +574,9 @@ def calendars():
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
     calendar_id = request.values.get('calendar_id', '')
+    if calendar_id:
+        calendar = Calendar.query.filter(Calendar.id == calendar_id).first()
+        return render_template("newcalendar.html", user=user, calendar=calendar)
 
     calendars = Calendar.query.all()
     return render_template("calendars.html", user=user, calendars=calendars)
@@ -614,8 +617,20 @@ def newcalendar():
                 db.session.commit()
             except Exception:
                 db.session.rollback()
-        elif calendar_action == "cancel":
-            return redirect("/calendars")
+        if calendar_action == "delete":
+            if calendar_id != 1 :
+                try:
+                    calendar = Calendar.query.filter(Calendar.id == calendar_id).first()
+                    vacation_data = Holiday.query.filter(Holiday.calendar_id == calendar_id).all()
+
+                    for vacation in vacation_data:
+                        db.session.delete(vacation)
+                    db.session.delete(calendar)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+        #elif calendar_action == "cancel":
+        return redirect("/calendars")
     return render_template("newcalendar.html", user=user, calendar=None)
 
 

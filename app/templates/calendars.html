@@ -67,7 +67,7 @@
         <ul>
             {% for calendar in calendars %}
             <form action="/calendars" method="post">
-                <li>{{ calendar.name }}<button name="id" value="{{ calendar.id }}">Edit</button></li>
+                <li>{{ calendar.name }}<button name="calendar_id" value="{{ calendar.id }}">Edit</button></li>
             </form>
             {% endfor %}
             {% if calendars|length == 0 %}
