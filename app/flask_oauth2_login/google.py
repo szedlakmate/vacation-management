@@ -12,11 +12,6 @@ class GoogleLogin(OAuth2Login):
     "https://www.googleapis.com/auth/userinfo.profile"
   )
 
-  #default_scope = (
-  #  "https://www.googleapis.com/auth/userinfo.email,"
-  #  "https://www.googleapis.com/auth/userinfo.profile"
-  #)
-
   default_redirect_path = "/login/google" #"/login/google"
 
   auth_url = "https://accounts.google.com/o/oauth2/auth"

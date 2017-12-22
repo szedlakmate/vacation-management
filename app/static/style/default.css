@@ -65,12 +65,13 @@ a:hover {
     text-align: right;
 }
 
+/*
 #loading {
     display: none;
     position: absolute;
     top: 10px;
     right: 10px;
-}
+}*/
 
 #calendar {
     max-width: 700px;
@@ -78,7 +79,7 @@ a:hover {
     padding: 0 10px;
 }
 
-/* COLORMAP # Must be in sync with the app.py file - COLORMAP array !!!! */
+/* CAL_COLORMAP:  Must be in sync with the config.py file - CAL_COLORMAP array! */
 
 .default {
     border: 1px solid #3a87ad;

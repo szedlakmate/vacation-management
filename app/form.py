@@ -11,10 +11,11 @@ from model import Calendar
 # This file holds all the form compositions.
 # New forms shall be registered here
 
+
 # User registration form
 class RegistrationForm(Form):
     nickname = StringField('Username', [validators.Length(min=3, max=10)])
-    birthday  = DateField('Your date of birth', [validators.DataRequired()])
+    birthday = DateField('Your date of birth', [validators.DataRequired()])
     accept_eula = BooleanField('I accept the End User License Agreement', [validators.DataRequired()])
 
     def post_validate(self):
@@ -35,6 +36,7 @@ class QueryCalendars(Form):
         query_factory=lambda: Calendar.query.all(),
         allow_blank=False
     )
+
 
 # Adding new event form
 class NewEventForm(Form):
