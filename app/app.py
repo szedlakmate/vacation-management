@@ -6,9 +6,6 @@ from flask_appconfig import AppConfig
 #import simplejson as json
 from sqlalchemy.exc import IntegrityError, OperationalError
 
-#from flask_wtf import FlaskForm
-#from wtforms import StringField
-#from wtforms.validators import DataRequired
 
 # *************************************************
 #              MAIN BACKEND PROGRAM
