@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VM - New Event</title>
+    <title>VM - New Calendar</title>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -29,11 +29,6 @@
 				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
 				Vacation Manager
 			</a>
-			{% if user.account_type != 1 %}
-			<a class="nav-item" href="/newevent">
-				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
-			</a>
-			{% endif %}
 		</div>
 
 		<div class="no-wrap">
@@ -62,18 +57,13 @@
 	</nav>
 
     <div>
-	{% from "_formhelpers.html" import render_field %}
-	<form method=post>
-		<dl>
-			{{ render_field(form.calendar_list) }}
-			{{ render_field(form.start) }}
-			{{ render_field(form.end) }}
-            {{ render_field(form.note) }}
-		</dl>
-		<p><input type=submit value=Register>
-	</form>
 
+        <form action="/newcalendar" method="post">
+                {% if calendar != None %}<input type="hidden" name="calendar_id" value="{{ calendar.id }}"/>{% endif %}
+                <input type="text" name="new_name" {% if calendar != None %} value="{{ calendar.name }}" {% endif %}> {% if calendar == None %}<button name="calendar_action" value="add">Add</button>{% else %}<button name="calendar_action" value="rename">Rename</button>{% endif %} <button name="calendar_action" value="cancel">Cancel</button>{% if calendar != None %}{% if calendar.id != 1 %} <button name="calendar_action" value="delete">Delete</button>{% endif %}{% endif %}
+        </form>
     </div>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
