@@ -407,7 +407,29 @@ def profile():
                                message="Please wait for admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of conditions ******************************
-    return redirect("home")
+    group_ids = GroupMember.query.filter(GroupMember.user_id == user.ext_id).all()
+    group_names = []
+    if group_ids:
+        for group in group_ids:
+            group_names.append(Group.query.filter(Group.id == group.group_id).first())
+    account_type = ""
+    account_status = ""
+
+    if user.account_type == 0:
+        account_type = "Standard user"
+    elif user.account_type == 1:
+        account_type = "Viewer"
+    elif user.account_type == 2:
+        account_type = "Admin"
+
+    if user.account_status == 0:
+        account_status = "Not activated"
+    elif user.account_status == 1:
+        account_status = "Active"
+    elif user.account_status == -1:
+        account_status = "Deactivated"
+
+    return render_template("profile.html", avatar_url=user.avatar_url, user=user, groups=group_names, account_type=account_type, account_status=account_status)
 
 
 @app.route('/groups')
