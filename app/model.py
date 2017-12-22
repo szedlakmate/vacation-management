@@ -28,7 +28,7 @@ class ConfigData():
     SECRET_KEY = 'secret'
 
 BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
-BASECALENDARS = [{'id':1, 'name':'Normal holiday', 'free_days':20},{'id':2, 'name':'Sick-leave'}]
+BASECALENDARS = [{'id':1, 'name':'Normal holiday', 'free_days':20},{'id':2, 'name':'Sick-leave', 'free_days':-1}]
 # XXX Need to be read from config file
 
 
@@ -194,7 +194,7 @@ def setupDB():
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
     for calendar in BASECALENDARS:
         try:
-            newcalendar = Calendar(name=calendar['name'], id=calendar['id'])
+            newcalendar = Calendar(name=calendar['name'], id=calendar['id'], free_days=calendar['free_days'])
             db.session.add(newcalendar)
             db.session.commit()
         except KeyError:  # IntegrityError:
