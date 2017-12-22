@@ -3,36 +3,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 import datetime
-
-
-# Database Configurations
 from sqlalchemy import ForeignKey
+from config import ConfigData           # Configuration
+
 
 # *************************************************
 #                     DATA MODEL
 # *************************************************
 
-# This data model file holds all the database descriptions. The data structure is built on this file.
+# This data model file holds all the database descriptions.
 
 app = Flask(__name__)
-DATABASE = 'vacation'
-PASSWORD = 'password'  # XXX Need to be read from config file
-USER = 'root'
 
-# Configuration data
-class ConfigData():
-    HOSTNAME = 'mysqlserver'
-    GOOGLE_LOGIN_CLIENT_SECRET = 'qAH_V-G5Gx49uk1VmsoVioo4'
-    GOOGLE_LOGIN_CLIENT_ID = '945161050960-9uafb16faeljklnvpu8gp31h5u23l517.apps.googleusercontent.com'
-    GOOGLE_LOGIN_REDIRECT_SCHEME = 'https'
-    SECRET_KEY = 'secret'
-
-BASEUSERS = [] #[{'id':1, 'username':'root', 'nickname':'root', 'google_id':'0', 'avatar':None, 'email': 'foo:bar', 'birthday':'1900-01-01', 'account_status':1}]
-BASECALENDARS = [{'id':1, 'name':'Normal holiday', 'free_days':20},{'id':2, 'name':'Sick-leave', 'free_days':-1}]
-# XXX Need to be read from config file
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(USER, PASSWORD, ConfigData.HOSTNAME, DATABASE)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(ConfigData.DB_USER, ConfigData.DB_PASSWORD, ConfigData.DB_HOSTNAME, ConfigData.DB_DATABASE)
 db = SQLAlchemy(app)
 
 # Database migration command line
@@ -154,15 +137,15 @@ class createDB():
         import sqlalchemy
         if hostname is not None:
             HOSTNAME = hostname
-        engine = sqlalchemy.create_engine('mysql://%s:%s@%s'%(USER, PASSWORD, HOSTNAME)) # connect to server
+        engine = sqlalchemy.create_engine('mysql://%s:%s@%s'%(ConfigData.DB_USER, ConfigData.DB_PASSWORD, ConfigData.DB_HOSTNAME)) # connect to server
         resetDB(engine)
-        engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(DATABASE))
+        engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(ConfigData.DB_DATABASE))
 
 
 # Reset: deleting previous traces
 def resetDB(engine):
     try:
-        engine.execute("DROP DATABASE %s "%(DATABASE))
+        engine.execute("DROP DATABASE %s "%(ConfigData.DB_DATABASE))
     except:
         db.session.rollback()
 
@@ -180,30 +163,42 @@ def createTables():
 def setupDB():
     from sqlalchemy.exc import IntegrityError
     import simplejson as json
-    for user in BASEUSERS:
+    for user in ConfigData.BASE_USERS:
         try:
             profile = User(username=user['username'], nickname=user['nickname'], google_id=user['google_id'],
                                avatar=user['avatar'], email=user['email'], birthday=user['birthday'], account_status=user['account_status'], id=user['id'])
             db.session.add(profile)
             db.session.commit()
-        #except KeyError:  # IntegrityError:
-        #    db.session.rollback()
-        except IntegrityError:
-            db.session.rollback()
-            return json.dumps(
-                    {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
-    for calendar in BASECALENDARS:
-        try:
-            newcalendar = Calendar(name=calendar['name'], id=calendar['id'], free_days=calendar['free_days'])
-            db.session.add(newcalendar)
-            db.session.commit()
-        except KeyError:  # IntegrityError:
+        except KeyError:
             db.session.rollback()
         except IntegrityError:
             db.session.rollback()
             return json.dumps(
                     {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
 
+    for calendar in ConfigData.BASE_CALENDARS:
+        try:
+            new_calendar = Calendar(name=calendar['name'], id=calendar['id'], free_days=calendar['free_days'])
+            db.session.add(new_calendar)
+            db.session.commit()
+        except KeyError:
+            db.session.rollback()
+        except IntegrityError:
+            db.session.rollback()
+            return json.dumps(
+                    {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
+
+    for group in ConfigData.BASE_GROUPS:
+        try:
+            new_group = Group(name=group['name'], id=group['id'])
+            db.session.add(new_group)
+            db.session.commit()
+        except KeyError:
+            db.session.rollback()
+        except IntegrityError:
+            db.session.rollback()
+            return json.dumps(
+                {'Integrity error was raised:': 'Please check the given data or contact the administrator'})
 
 
 if __name__ == '__main__':

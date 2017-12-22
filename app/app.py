@@ -13,9 +13,11 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 # DB model functions and classes
 from model import createDB, setupDB, createTables, hashID                   # Functions
-from model import ConfigData, User, Calendar, Holiday, GroupMember, Group   # Classes
+from model import User, Calendar, Holiday, GroupMember, Group   # Classes
 from model import app as application
 from model import db
+
+from config import ConfigData           # Configuration
 
 from form import RegistrationForm, NewEventForm
 
@@ -25,27 +27,29 @@ from flask_oauth2_login import GoogleLogin
 # Global debugging switch
 # To start debugging in docker-compose, run the container the following way:
 # docker-compose run --service-ports web
-DEBUG_Flask = True
-DEBUG = False
+DEBUG_FLASK = ConfigData.DEBUG_FLASK
+DEBUG = ConfigData.DEBUG
 
-import pdb # XXX Should be excluded from final version
-
-
-COLORMAP = ['green', 'cornflowerblue', 'yellow', 'red', 'amber', 'purple', 'pink'] # Must be in sync with the default.css file!!!!
+if DEBUG:
+    import pdb
 
 def appConfig():
     AppConfig(app, configfile=None)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   # Suggested by SQLAlchemy
 
-    # You must configure these 3 values from Google APIs console
-    # https://code.google.com/apis/console          mateszedlak@invenshure.com
     app.config.update(
-        SECRET_KEY = ConfigData.SECRET_KEY,
+        SECRET_KEY = ConfigData.GOOGLE_SECRET_KEY,
         GOOGLE_LOGIN_REDIRECT_SCHEME = ConfigData.GOOGLE_LOGIN_REDIRECT_SCHEME,
     )
     app.config["GOOGLE_LOGIN_CLIENT_ID"] = ConfigData.GOOGLE_LOGIN_CLIENT_ID
     app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = ConfigData.GOOGLE_LOGIN_CLIENT_SECRET
-    app.config.from_pyfile('email.cfg')
+    app.config["MAIL_SERVER"] = ConfigData.MAIL_SERVER
+    app.config["MAIL_PORT"] = ConfigData.MAIL_PORT
+    app.config["MAIL_USE_SSL"] = ConfigData.MAIL_USE_SSL
+    app.config["MAIL_USE_TLS"] = ConfigData.MAIL_USE_TLS
+    app.config["MAIL_USERNAME"] = ConfigData.MAIL_USERNAME
+    app.config["MAIL_PASSWORD"] = ConfigData.MAIL_PASSWORD
+    app.config["MAIL_DEFAULT_SENDER"] = ConfigData.MAIL_DEFAULT_SENDER
 
 
 # Initialize web app
@@ -56,17 +60,11 @@ mail = Mail()
 mail.init_app(app)
 
 
-# ****************************************
-#   MISSING PAGES:
-# calendars, groups, users, profile
-# ****************************************
-
-
 @google_login.login_success
 def login_success(token, profile):
     if DEBUG:
         pdb.set_trace()
-    if (User.query.filter(User.ext_id == profile['id']).first() is not None):
+    if User.query.filter(User.ext_id == profile['id']).first() is not None:
         session['profile_ext_id_hashed'] = hashID(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
         db.session.commit()
@@ -99,15 +97,6 @@ def getevents(start_date, end_date, user, get_all):
     return events
 
 
-@app.route('/mail')
-def trymail(): # "Dear %s,\n\nYour Vacation Management account was activated.\n\nBest regards,\nThe VM Team" % "Máté"
-    msg = Message("Hello World",
-                  sender="demo.szedlak@gmail.com",
-                  recipients=["szedlakmate@gmail.com"])
-    mail.send(msg)
-    return "Mail sent"
-
-
 # Query for Holiday events
 @app.route('/data')
 def return_data():
@@ -118,20 +107,20 @@ def return_data():
     events = getevents(start_date, end_date, user, get_all)
     events_arr = []
     for event in events:
-        eventcolor = ''
+        event_color = ''
         style = ''
         if event.status == 0:
             style += 'redborder'
         elif event.status == -1:
             style += 'light'
         if event.user_id == user.ext_id:
-            eventcolor += 'default'
+            event_color += 'default'
         else:
-            eventcolor += COLORMAP[int((User.query.filter(User.ext_id == event.user_id).first().ext_id_hashed)) % len(COLORMAP)]
-        if style and eventcolor:
+            event_color += ConfigData.CAL_COLORMAP[int((User.query.filter(User.ext_id == event.user_id).first().ext_id_hashed)) % len(ConfigData.CAL_COLORMAP)]
+        if style and event_color:
             style += " "
-        if eventcolor:
-            style += eventcolor
+        if event_color:
+            style += event_color
         title = ''
         if event.user_id:
             if user.account_type > 0:
@@ -645,7 +634,7 @@ def logout():
 
 @app.route('/reset')
 def reset():
-    database = createDB(hostname=ConfigData.HOSTNAME)
+    database = createDB(hostname=ConfigData.DB_HOSTNAME)
     createTables()
     setupDB()
     return redirect(url_for('index'))
@@ -653,4 +642,4 @@ def reset():
 
 if __name__ == "__main__":
     context=('./app/self.vacation.crt','./app/self.vacation.key')
-    app.run(host="0.0.0.0", port=5000, debug=DEBUG_Flask, ssl_context=context)
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG_FLASK, ssl_context=context)
