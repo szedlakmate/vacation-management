@@ -13,10 +13,10 @@ class ConfigData:
     # docker-compose run --service-ports web
 
     # Database configuration
-    DB_HOSTNAME = 'mysqlserver'
+    DB_HOSTNAME = 'mysqlserver'  # SET UP if needed
     DB_DATABASE = 'vacation'
-    DB_PASSWORD = 'password'
-    DB_USER = 'root'
+    DB_PASSWORD = 'password'     # SET UP if needed
+    DB_USER = 'root'             # SET UP if needed
 
     # Google authentication data
     # You must configure these 3 values from Google APIs console
