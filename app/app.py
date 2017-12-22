@@ -1,28 +1,34 @@
+"""
+Documentation
+
+This program was written by Máté Szedlák (c) 2017 (mateszedlak@invenshure.com). All rights reserved.
+Source:
+https://github.com/szedlakmate/vacation-management/
+
+Version: 1.0
+Created: 22-12-2017
+"""
+
 from datetime import timedelta
+
+# Import from 3rd party packages
 from flask import Flask, url_for, redirect, render_template, jsonify, session, request
 from flask_mail import Mail, Message
-#from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
-#import simplejson as json
 from sqlalchemy.exc import IntegrityError, OperationalError
+from flask_oauth2_login import GoogleLogin
+
+# Import from local files
+from model import createDB, setupDB, createTables, hashID       # Functions
+from model import User, Calendar, Holiday, GroupMember, Group   # Classes
+from model import db
+from config import ConfigData           # Configuration data
+from form import RegistrationForm, NewEventForm
 
 
 # *************************************************
 #              MAIN BACKEND PROGRAM
 # *************************************************
-
-# DB model functions and classes
-from model import createDB, setupDB, createTables, hashID                   # Functions
-from model import User, Calendar, Holiday, GroupMember, Group   # Classes
-from model import app as application
-from model import db
-
-from config import ConfigData           # Configuration
-
-from form import RegistrationForm, NewEventForm
-
-from flask_oauth2_login import GoogleLogin
-
 
 # Global debugging switch
 # To start debugging in docker-compose, run the container the following way:
@@ -33,6 +39,7 @@ DEBUG = ConfigData.DEBUG
 if DEBUG:
     import pdb
 
+# Configuring app() and reading further config data
 def appConfig():
     AppConfig(app, configfile=None)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   # Suggested by SQLAlchemy
@@ -60,16 +67,21 @@ mail = Mail()
 mail.init_app(app)
 
 
+# Required by the 3rd party Google Login package
 @google_login.login_success
 def login_success(token, profile):
+    # Conditionally setting breakpoint
     if DEBUG:
         pdb.set_trace()
+
+    # Checking if the user is already signed in
     if User.query.filter(User.ext_id == profile['id']).first() is not None:
         session['profile_ext_id_hashed'] = hashID(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
         db.session.commit()
         return redirect('home')
     else:
+        # Setting session cookie
         session.clear()
         session['profile_name']=profile['name']
         session['profile_email']=profile['email']
@@ -78,6 +90,7 @@ def login_success(token, profile):
         return redirect('register')
 
 
+# Required by the 3rd party Google Login package
 @google_login.login_failure
 def login_failure(e):
     try:
@@ -87,7 +100,9 @@ def login_failure(e):
     return redirect(url_for('index'))
 
 
+# Required by the 3rd party flask-calendar package: https://github.com/sukeesh/flask-calendar
 def getevents(start_date, end_date, user, get_all):
+    # Query for all the corresponding events
     all_events = Holiday.query.filter((~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
                                                                              ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date)))))
     if user.account_type > 0 and get_all:
@@ -97,13 +112,13 @@ def getevents(start_date, end_date, user, get_all):
     return events
 
 
-# Query for Holiday events
+# Transfering event data to JS (flask-calendar package: https://github.com/sukeesh/flask-calendar)
 @app.route('/data')
 def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
-    get_all = True
+    get_all = True      # Not used in this version
     events = getevents(start_date, end_date, user, get_all)
     events_arr = []
     for event in events:
@@ -116,6 +131,7 @@ def return_data():
         if event.user_id == user.ext_id:
             event_color += 'default'
         else:
+            # Defining different colors for different users
             event_color += ConfigData.CAL_COLORMAP[int((User.query.filter(User.ext_id == event.user_id).first().ext_id_hashed)) % len(ConfigData.CAL_COLORMAP)]
         if style and event_color:
             style += " "
@@ -129,6 +145,8 @@ def return_data():
                 title += str(Calendar.query.filter(Calendar.id == event.calendar_id).first().name)
         if event.note:
             title += '-' + event.note
+
+        # Returning properly formatted event data to JS
         events_arr.append({
             'title': title,
             'url': event.url,
@@ -138,16 +156,16 @@ def return_data():
         })
     return jsonify(events_arr)
 
-# Query for Holiday events
+# User activation
 @app.route('/activateuser', methods=['GET', 'POST'])
 def activateuser():
     if DEBUG:
         pdb.set_trace()
     user_id = request.form.get('id', '')
     action = request.form.get('action', '')
-    typechange = request.form.get ('typechange','')
+    type_change = request.form.get ('typechange','')
     if not user_id:
-        user_id = typechange
+        user_id = type_change
     if action is None:
         action = 1
     else:
@@ -157,10 +175,10 @@ def activateuser():
             pass
     try:
         user = User.query.filter(User.ext_id == user_id).first()
-        if not typechange:
+        if not type_change:
             user.account_status = action
             if action == 1:
-
+                # Sending mail through existing Gmail account
                 msg = Message("Account activation",
                               sender="noreply@example.com",
                               recipients=[user.email])
@@ -176,6 +194,8 @@ def activateuser():
         db.session.rollback()
     return redirect("users")
 
+
+# Landing page - Signed off state
 @app.route('/')
 def index():
     if DEBUG:
@@ -187,7 +207,7 @@ def index():
             return render_template("landing.html", login_url=google_login.authorization_url())
     except OperationalError:
         return redirect("reset")
-        # XXX Should be offered than to be default!
+        # Should be offered before execution!!!
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -199,6 +219,8 @@ def register():
         if not len(User.query.filter(User.account_status == 1).all()):
             account_status = 1
             account_type = 2
+
+        # Building user profile from WTFoprms input and Google profile data
         profile = User(name=session['profile_name'],
                        nickname=form.nickname.data,
                        ext_id=session['profile_ext_id'],
@@ -207,6 +229,9 @@ def register():
                        birthday=form.birthday.data,
                        account_status=account_status,
                        account_type = account_type)
+
+        # The session might not contain any google profile data.
+        # To avoid it, the user id is hashed and this hash is used as the key.
         session['profile_ext_id_hashed'] = hashID(session['profile_ext_id'])
         session.pop('profile_ext_id')
         session.pop('profile_name')
@@ -216,7 +241,7 @@ def register():
             db.session.add(profile)
             db.session.commit()
             return redirect('home')
-        except KeyError:  # IntegrityError:
+        except KeyError:
             db.session.rollback()
             session.clear()
             return redirect(url_for('index'))
@@ -230,7 +255,7 @@ def register():
 
 @app.route('/home')
 def home():
-    # Standard conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -241,13 +266,13 @@ def home():
         return render_template("message.html",
                                message="Please wait for admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
-    # End of standard conditions ******************************
+    # End of standard conditions *****************************************************
     return render_template("home.html", user=user)
 
 
 @app.route('/newevent', methods=['GET', 'POST'])
 def newevent():
-    # Standard conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -300,7 +325,7 @@ def newevent():
 
 @app.route('/users')
 def users():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -325,7 +350,7 @@ def users():
 
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
 def eventedit(event_id):
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -384,7 +409,7 @@ def eventedit(event_id):
 
 @app.route('/profile')
 def profile():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -423,7 +448,7 @@ def profile():
 
 @app.route('/groups')
 def groups():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -444,7 +469,7 @@ def groups():
 
 @app.route('/groups/<id>', methods=['GET', 'POST'])
 def group_edit(id):
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -476,7 +501,7 @@ def group_edit(id):
 
 @app.route('/newgroup', methods=['GET', 'POST'])
 def newgroup():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -548,7 +573,7 @@ def newgroup():
 
 @app.route('/calendars', methods=['GET', 'POST'])
 def calendars():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -573,7 +598,7 @@ def calendars():
 
 @app.route('/newcalendar', methods=['GET', 'POST'])
 def newcalendar():
-    # Conditions *************************************
+    # Standard conditions to check if the user has proper right to acces the page ***
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
@@ -618,7 +643,7 @@ def newcalendar():
                     db.session.commit()
                 except Exception:
                     db.session.rollback()
-        #elif calendar_action == "cancel":
+        #elif calendar_action == "cancel":  # The default return function is enough
         return redirect("/calendars")
     return render_template("newcalendar.html", user=user, calendar=None)
 
@@ -641,5 +666,6 @@ def reset():
 
 
 if __name__ == "__main__":
+    # The Google login process requires HTTPS protocol
     context=('./app/self.vacation.crt','./app/self.vacation.key')
     app.run(host="0.0.0.0", port=5000, debug=DEBUG_FLASK, ssl_context=context)
