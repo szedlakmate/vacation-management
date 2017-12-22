@@ -15,7 +15,11 @@ from config import ConfigData           # Configuration
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s'%(ConfigData.DB_USER, ConfigData.DB_PASSWORD, ConfigData.DB_HOSTNAME, ConfigData.DB_DATABASE)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://%s:%s@%s/%s' \
+                                        %(ConfigData.DB_USER,
+                                          ConfigData.DB_PASSWORD,
+                                          ConfigData.DB_HOSTNAME,
+                                          ConfigData.DB_DATABASE)
 db = SQLAlchemy(app)
 
 # Database migration command line
@@ -24,29 +28,32 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
-def hashID(hashable):
+def hash_id(hashable):
     return hash(str(hashable) + "mfkF")
 
 
 # User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ext_id = db.Column(db.String(200), unique=True, nullable=False) # XXX prefix should be added
+    ext_id = db.Column(db.String(200), unique=True, nullable=False)         # Prefix should be added like 'google_'
     ext_id_hashed = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(50), unique=False, nullable=False)
     nickname = db.Column(db.String(10), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    avatar_url = db.Column(db.String(200), unique=False, default="https://t3.ftcdn.net/jpg/00/64/67/52/240_F_64675209_7ve2XQANuzuHjMZXP3aIYIpsDKEbF5dD.jpg")
-    birthday = db.Column(db.Date, unique=False, nullable=False)     # XXX Should be Nullable
+    avatar_url = db.Column(db.String(200), unique=False,
+                           default="https://t3.ftcdn.net/jpg/00/64/67/52/"
+                                   "240_F_64675209_7ve2XQANuzuHjMZXP3aIYIpsDKEbF5dD.jpg")
+    birthday = db.Column(db.Date, unique=False, nullable=False)     # Nullable should be enabled to manually set later.
     account_type = db.Column(db.Integer, unique=False, nullable=False, default=0)
     account_status = db.Column(db.Integer, unique=False, nullable=False, default=0)
     account_created = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
 
-    def __init__(self, ext_id, name, nickname, email, birthday, avatar_url=None, id=None, account_type= None, account_status=None):
+    def __init__(self, ext_id, name, nickname, email, birthday, avatar_url=None, id=None,
+                 account_type=None, account_status=None):
         if id:
             self.id = id
         self.ext_id = ext_id
-        self.ext_id_hashed = hashID(ext_id)
+        self.ext_id_hashed = hash_id(ext_id)
         self.name = name
         self.nickname = nickname
         self.email = email
@@ -89,7 +96,7 @@ class Holiday(db.Model):
     end = db.Column(db.Date, unique=False, nullable=False)
     url = db.Column(db.String(200), nullable=True)
     note = db.Column(db.String(15), unique=False, nullable=True)
-    status = db.Column(db.Integer, unique=False, nullable=False, default = 0)
+    status = db.Column(db.Integer, unique=False, nullable=False, default=0)
 
     def __init__(self, user_id, calendar_id, start, end, id=None, note=None, url=None):
         # initialize columns
@@ -132,26 +139,26 @@ class GroupMember(db.Model):
 
 
 # Connecting to the mysql service and creating database if needed
-class createDB():
-    def __init__(self, hostname=None):
+class CreateDB:
+    def __init__(self):
         import sqlalchemy
-        if hostname is not None:
-            HOSTNAME = hostname
-        engine = sqlalchemy.create_engine('mysql://%s:%s@%s'%(ConfigData.DB_USER, ConfigData.DB_PASSWORD, ConfigData.DB_HOSTNAME)) # connect to server
-        resetDB(engine)
-        engine.execute("CREATE DATABASE IF NOT EXISTS %s "%(ConfigData.DB_DATABASE))
+        engine = sqlalchemy.create_engine('mysql://%s:%s@%s' %(ConfigData.DB_USER,
+                                                               ConfigData.DB_PASSWORD,
+                                                               ConfigData.DB_HOSTNAME))     # connect to server
+        reset_db(engine)
+        engine.execute("CREATE DATABASE IF NOT EXISTS %s " % ConfigData.DB_DATABASE)
 
 
 # Reset: deleting previous traces
-def resetDB(engine):
+def reset_db(engine):
     try:
-        engine.execute("DROP DATABASE %s "%(ConfigData.DB_DATABASE))
-    except:
+        engine.execute("DROP DATABASE %s " % ConfigData.DB_DATABASE)
+    except Exception:
         db.session.rollback()
 
 
 # Creating tables
-def createTables():
+def create_tables():
     from sqlalchemy.exc import IntegrityError
     try:
         db.create_all()
@@ -160,13 +167,21 @@ def createTables():
 
 
 # Setting up the initial records
-def setupDB():
+def setup_db():
     from sqlalchemy.exc import IntegrityError
     import simplejson as json
     for user in ConfigData.BASE_USERS:
         try:
-            profile = User(username=user['username'], nickname=user['nickname'], google_id=user['google_id'],
-                               avatar=user['avatar'], email=user['email'], birthday=user['birthday'], account_status=user['account_status'], id=user['id'])
+            profile = User(name=user['name'],
+                           nickname=user['nickname'],
+                           ext_id=user['ext_id'],
+                           avatar_url=user['avatar_url'],
+                           email=user['email'],
+                           birthday=user['birthday'],
+                           account_type=user['account_type'],
+                           account_status=user['account_status'],
+                           id=user['id'])
+
             db.session.add(profile)
             db.session.commit()
         except KeyError:
