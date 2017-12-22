@@ -64,23 +64,27 @@
     {% if group != None %}
     <div>
     <h3>Members</h3>
-    <form action="/newgroup" method="post">
-        <input type="hidden" name="user_action" value="remove"/>
+
         <ul>
             {% for user in member %}
-            <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Remove</button></li>
+            <form action="/newgroup" method="post">
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="hidden" name="user_action" value="remove"/>
+                <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Remove</button></li>
+            </form>
             {% endfor %}
             {% if member|length == 0 %}
                 There is no member.
             {% endif %}
         </ul>
-    </form>
+
     <h3>Others</h3>
         <ul>
             {% for user in outer %}
             <form action="/newgroup" method="post">
-                <input type="hidden" name="group_id" value="{{ group.id}}"/>
-                <li>{{ group.id}} {{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="hidden" name="user_action" value="add"/>
+                <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
             {% endfor %}
             {% if outer|length == 0 %}
                 There is no other user.

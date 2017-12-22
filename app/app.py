@@ -490,6 +490,7 @@ def newgroup():
             return redirect("/groups")
         elif group_action == "delete":
             try:
+                group = Group.query.filter(Group.id == group_id).first()
                 db.session.delete(group)
                 db.session.commit()
             except Exception:
@@ -507,12 +508,15 @@ def newgroup():
                 db.session.rollback()
         elif user_action == "remove":
             try:
-                old_member = GroupMember.query.filter(GroupMember.user_id == user_id).first()
+                old_member = GroupMember.query.filter(GroupMember.user_id == user_id, GroupMember.group_id == group_id).first()
                 db.session.delete(old_member)
                 db.session.commit()
             except Exception:
                 db.session.rollback()
-        return redirect('/groups')
+        if len(str(group_id)) > 0:
+            return redirect('/groups/' + str(group_id))
+        else:
+            return redirect('/groups')
     return render_template('newgroup.html', avatar_url=user.avatar_url, group=None, member=[], outer=User.query.all())
 
 

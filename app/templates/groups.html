@@ -29,9 +29,6 @@
                 <img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
                 Vacation Manager
             </a>
-            <a class="nav-item" href="/newevent">
-                <img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
-            </a>
         </div>
 
         <div class="no-wrap">
@@ -63,12 +60,8 @@
         </a>
     </div>
 
-
     <div>
-
     <h3>User Groups</h3>
-
-
         <ul>
             {% for group in groups %}
             <form action="/groups/{{ group.id }}" method="post">
@@ -79,9 +72,6 @@
                 There is no group defined.
             {% endif %}
         </ul>
-
-        <button name="action" value="rename">Rename</button> <button name="action" value="delete">Delete</button>
-
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
