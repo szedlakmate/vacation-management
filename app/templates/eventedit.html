@@ -32,7 +32,7 @@
 		</div>
 
 		<div class="no-wrap">
-			{% if account_type == 2 %}
+			{% if user.account_type == 2 %}
 			<a class="d-inline" href="/calendars">
 				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
 			</a>
@@ -47,7 +47,7 @@
 			{% endif %}
 
 			<a class="d-inline avatar" href="/profile">
-				<img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
+				<img src= "{{ user.avatar_url }}"  class="d-inline-block avatar-img" alt="">
 			</a>
 
 			<a class="d-inline" href="/logout">
@@ -60,7 +60,7 @@
         <form action="" method="post">
             {{ username }} - {{ calendar_name }} -  {{ start }} - {{ end }}{% if note != "" %} -  {{ note }}{% endif %}
             {% if status == 1 %}Allowed{% elif status == -1 %} - Denied{% endif %} -
-            {% if account_type == 2 %}
+            {% if user.account_type == 2 %}
                 {% if status != 1 %}<button name="allow" value="1">Allow</button>{% endif %}
                 {% if status != -1 %}<button name="allow" value="-1">Deny</button>{% endif %}
             {% endif %}

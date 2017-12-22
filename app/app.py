@@ -253,7 +253,7 @@ def home():
                                message="Please wait for admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
-    return render_template("home.html", avatar_url=user.avatar_url, account_type= user.account_type)
+    return render_template("home.html", user=user)
 
 
 @app.route('/newevent', methods=['GET', 'POST'])
@@ -306,7 +306,7 @@ def newevent():
             return redirect(url_for('home'))
 
 
-    return render_template('newevent.html', form=form, account_type= user.account_type)
+    return render_template('newevent.html', form=form, user=user)
 
 
 @app.route('/users')
@@ -331,7 +331,7 @@ def users():
     active = User.query.filter((User.account_status == 1)).all()
     current_ext_id = user.ext_id
     return render_template("users.html",
-                        avatar_url=user.avatar_url, account_type= user.account_type, inactive=inactive, active=active, current_ext_id=current_ext_id)
+                        user=user, inactive=inactive, active=active, current_ext_id=current_ext_id)
 
 
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
@@ -382,7 +382,7 @@ def eventedit(event_id):
 
 
     return render_template("eventedit.html",
-                           avatar_url=user.avatar_url,
+                           user=user,
                            account_type=user.account_type,
                            username=event_user.nickname,
                            calendar_name=Calendar.query.filter(Calendar.id == event.calendar_id).first().name,
@@ -450,7 +450,7 @@ def groups():
     # End of conditions ******************************
 
     groups = Group.query.all()
-    return render_template("groups.html", avatar_url=user.avatar_url, groups=groups)
+    return render_template("groups.html", avatar_url=user.avatar_url, groups=groups, user=user)
 
 
 @app.route('/groups/<id>', methods=['GET', 'POST'])
@@ -482,7 +482,7 @@ def group_edit(id):
                 outer.append(account)
         # member.sort()
         # outer.sort()
-        return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
+        return render_template('newgroup.html', user=user, group=group, member=member, outer=outer)
 
 
 @app.route('/newgroup', methods=['GET', 'POST'])
@@ -554,10 +554,10 @@ def newgroup():
             return redirect('/groups/' + str(group_id))
         else:
             return redirect('/groups')
-    return render_template('newgroup.html', avatar_url=user.avatar_url, group=None, member=[], outer=User.query.all())
+    return render_template('newgroup.html', user=user, group=None, member=[], outer=User.query.all())
 
 
-@app.route('/calendars')
+@app.route('/calendars', methods=['GET', 'POST'])
 def calendars():
     # Conditions *************************************
     if DEBUG:
@@ -573,7 +573,50 @@ def calendars():
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
-    return render_template("calendars.html")
+    calendar_id = request.values.get('calendar_id', '')
+
+    calendars = Calendar.query.all()
+    return render_template("calendars.html", user=user, calendars=calendars)
+
+
+@app.route('/newcalendar', methods=['GET', 'POST'])
+def newcalendar():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    calendar_action = ""
+    calendar_action = request.values.get('calendar_action', '')
+    if calendar_action:
+        new_name = request.values.get('new_name', '')
+        calendar_id = request.values.get('calendar_id', '')
+        if calendar_action == "add":
+            try:
+                calendar = Calendar(name=new_name)
+                db.session.add(calendar)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        if calendar_action == "rename":
+            try:
+                calendar = Calendar.query.filter(Calendar.id == calendar_id).first()
+                calendar.name = new_name
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        elif calendar_action == "cancel":
+            return redirect("/calendars")
+    return render_template("newcalendar.html", user=user, calendar=None)
 
 
 @app.route('/logout')

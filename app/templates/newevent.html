@@ -23,36 +23,44 @@
 
 </head>
 <body>
-    <nav class="navbar navbar-light bg-light">
-        <div class="no-wrap">
-            <a class="navbar-brand no-padding"  href="/home">
-                <img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
-                Vacation Manager
-            </a>
-        </div>
+	<nav class="navbar navbar-light bg-light">
+		<div class="no-wrap">
+			<a class="navbar-brand no-padding"  href="/home">
+				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
+				Vacation Manager
+			</a>
+			{% if user.account_type != 1 %}
+			<a class="nav-item" href="/newevent">
+				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
+			</a>
+			{% endif %}
+		</div>
 
-        <div class="no-wrap">
-            <a class="d-inline" href="/calendars">
-                <img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
-            </a>
+		<div class="no-wrap">
+			{% if user.account_type == 2 %}
+			<a class="d-inline" href="/calendars">
+				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
+			</a>
 
-            <a class="d-inline" href="/groups/all">
-                Groups
-            </a>
+			<a class="d-inline" href="/groups/all">
+				Groups
+			</a>
 
-            <a class="d-inline" href="/users">
-                Users
-            </a>
+			<a class="d-inline" href="/users">
+				Users
+			</a>
+			{% endif %}
 
-            <a class="d-inline avatar" href="/profile">
-                <img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
-            </a>
+			<a class="d-inline avatar" href="/profile">
+				<img src= "{{ user.avatar_url }}"  class="d-inline-block avatar-img" alt="">
+			</a>
 
-            <a class="d-inline" href="/logout">
-                <img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="30" height="30" class="d-inline-block align-top" alt="">
-            </a>
-        </div>
-    </nav>
+			<a class="d-inline" href="/logout">
+				<img src= "{{ url_for('static', filename='img/logout.png') }}" class="d-inline-block"  width="30" height="30" class="d-inline-block align-top" alt="">
+			</a>
+		</div>
+	</nav>
+
     <div>
 	{% from "_formhelpers.html" import render_field %}
 	<form method=post>
