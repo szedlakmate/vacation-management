@@ -491,7 +491,10 @@ def newgroup():
         elif group_action == "delete":
             try:
                 group = Group.query.filter(Group.id == group_id).first()
+                member_data = GroupMember.query.filter(GroupMember.id == group_id).all()
                 db.session.delete(group)
+                for member in member_data:
+                    db.session.delete(member)
                 db.session.commit()
             except Exception:
                 db.session.rollback()
