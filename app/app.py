@@ -441,7 +441,7 @@ def group_edit(id):
         member = []
         outer = []
         for user in User.query.all():
-            if GroupMember.query.filter(GroupMember.group_id == id).all():
+            if GroupMember.query.filter(GroupMember.group_id == id, GroupMember.user_id == user.ext_id).all():
                 member.append(user)
             else:
                 outer.append(user)
