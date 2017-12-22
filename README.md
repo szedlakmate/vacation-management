@@ -24,8 +24,14 @@ If the setting are correct, open a terminal, go to the project's root folder and
 * docker-compose up -d
 
 If the containers started correctly, the site can be reached at the [localhost](https://localhost).
+
+** Before first use, the corresponding database should be resetted by visiting the following address:
+* [https://localhost/reset](https://localhost/reset)
+
 To check the logs if needed, use the following command:
 * docker-compose logs -f
 
 # Start using
 In order to use the app, google login is required.
+
+Please note that the very first user who registers will automatically become admin.
