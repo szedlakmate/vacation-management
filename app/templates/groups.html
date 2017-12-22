@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VM - New Event</title>
+    <title>VM - User Groups</title>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -53,18 +53,25 @@
             </a>
         </div>
     </nav>
-    <div>
-	{% from "_formhelpers.html" import render_field %}
-	<form method=post>
-		<dl>
-			{{ render_field(form.calendar_list) }}
-			{{ render_field(form.start) }}
-			{{ render_field(form.end) }}
-            {{ render_field(form.note) }}
-		</dl>
-		<p><input type=submit value=Register>
-	</form>
 
+    <div class="left">
+        <a href="/newgroup">
+            New Group
+        </a>
+    </div>
+
+    <div>
+    <h3>User Groups</h3>
+        <ul>
+            {% for group in groups %}
+            <form action="/groups/{{ group.id }}" method="post">
+                <li>{{ group.name }}<button name="id" value="{{ group.id }}">Edit</button></li>
+            </form>
+            {% endfor %}
+            {% if groups|length == 0 %}
+                There is no group defined.
+            {% endif %}
+        </ul>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

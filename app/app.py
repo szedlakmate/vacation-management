@@ -1,4 +1,6 @@
-from flask import Flask, url_for, redirect, render_template, jsonify, session, request, flash
+from datetime import timedelta
+from flask import Flask, url_for, redirect, render_template, jsonify, session, request
+from flask_mail import Mail, Message
 #from flask_sqlalchemy import SQLAlchemy
 from flask_appconfig import AppConfig
 #import simplejson as json
@@ -13,8 +15,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 # *************************************************
 
 # DB model functions and classes
-from model import createDB, setupDB, createTables, hashID    # Functions
-from model import ConfigData, User, Calendar, Holiday        # Classes
+from model import createDB, setupDB, createTables, hashID                   # Functions
+from model import ConfigData, User, Calendar, Holiday, GroupMember, Group   # Classes
 from model import app as application
 from model import db
 
@@ -46,12 +48,15 @@ def appConfig():
     )
     app.config["GOOGLE_LOGIN_CLIENT_ID"] = ConfigData.GOOGLE_LOGIN_CLIENT_ID
     app.config["GOOGLE_LOGIN_CLIENT_SECRET"] = ConfigData.GOOGLE_LOGIN_CLIENT_SECRET
+    app.config.from_pyfile('email.cfg')
 
 
 # Initialize web app
 app = Flask(__name__, static_url_path='/code/app/static')
 appConfig()
 google_login = GoogleLogin(app)
+mail = Mail()
+mail.init_app(app)
 
 
 # ****************************************
@@ -89,12 +94,21 @@ def login_failure(e):
 
 def getevents(start_date, end_date, user, get_all):
     all_events = Holiday.query.filter((~ (((Holiday.start < start_date) & (Holiday.end < start_date) & (Holiday.start < end_date) & (Holiday.end < end_date)) |
-                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date))))).all()
+                                                                             ((Holiday.start > start_date) & (Holiday.end > start_date) & (Holiday.start > end_date) & (Holiday.end > end_date)))))
     if user.account_type > 0 and get_all:
-        events = all_events
+        events = all_events.all()
     else:
-        events = all_events.filter(Holiday.user_id == user.ext_id)
+        events = all_events.filter(Holiday.user_id == user.ext_id).all()
     return events
+
+
+@app.route('/mail')
+def trymail(): # "Dear %s,\n\nYour Vacation Management account was activated.\n\nBest regards,\nThe VM Team" % "Máté"
+    msg = Message("Hello World",
+                  sender="demo.szedlak@gmail.com",
+                  recipients=["szedlakmate@gmail.com"])
+    mail.send(msg)
+    return "Mail sent"
 
 
 # Query for Holiday events
@@ -103,7 +117,6 @@ def return_data():
     start_date = request.args.get('start', '')
     end_date = request.args.get('end', '')
     user = User.query.filter(User.ext_id_hashed == session.get('profile_ext_id_hashed')).first()
-
     get_all = True
     events = getevents(start_date, end_date, user, get_all)
     events_arr = []
@@ -111,6 +124,8 @@ def return_data():
         eventcolor = ''
         style = ''
         if event.status == 0:
+            style += 'redborder'
+        elif event.status == -1:
             style += 'light'
         if event.user_id == user.ext_id:
             eventcolor += 'default'
@@ -125,12 +140,11 @@ def return_data():
             title = user.nickname
         if event.note:
             title += '-' + event.note
-
         events_arr.append({
             'title': title,
             'url': event.url,
             'start': event.start.isoformat(),
-            'end': event.end.isoformat(),
+            'end': (event.end + timedelta(days=1)).isoformat(),
             'style': style
         })
     return jsonify(events_arr)
@@ -147,15 +161,28 @@ def activateuser():
         user_id = typechange
     if action is None:
         action = 1
+    else:
+        try:
+            action = int(action)
+        except Exception:
+            pass
     try:
         user = User.query.filter(User.ext_id == user_id).first()
         if not typechange:
             user.account_status = action
+            if action == 1:
+
+                msg = Message("Account activation",
+                              sender="noreply@example.com",
+                              recipients=[user.email])
+                msg.body = "Dear %s,\n\nYour Vacation Management account is now active.\n\nBest regards,\nThe VM Team" % user.nickname
+                mail.send(msg)
         else:
             user.account_type = (user.account_type + 1) % 3
         db.session.commit()
     except KeyError:
         db.session.rollback()
+        return redirect("users")
     except IntegrityError:
         db.session.rollback()
     return redirect("users")
@@ -311,17 +338,21 @@ def eventedit(event_id):
     if DEBUG:
         pdb.set_trace()
     user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
-    if (user is None):
-        session.clear()
-        return redirect(url_for('index'))
-    elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
-    elif (user.account_type != 2):
-        return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    event = Holiday.query.filter(Holiday.id == event_id).first()
+    try:
+        if (user is None):
+            session.clear()
+            return redirect(url_for('index'))
+        elif (user.account_status == 0):
+            return render_template("waitforapproval.html")
+        elif (user.account_type < 1) and (event.user_id != user.ext_id) and (event.status != 0):
+            return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
+    except AttributeError:
+        return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
     # End of conditions ******************************
     if DEBUG:
         pdb.set_trace()
-    event = Holiday.query.filter(Holiday.id == event_id).first()
+
     event_user = User.query.filter(User.ext_id == event.user_id).first()
 
     if not event.note:
@@ -334,8 +365,11 @@ def eventedit(event_id):
         event_allow = int(request.form.get('allow', ''))
     except ValueError:
         event_allow = None
-    if event_allow == 0 or event_allow == 1:
-        event.status = event_allow
+    if event_allow:
+        if event_allow == -1 or event_allow == 1:
+            event.status = event_allow
+        if event_allow == -2:
+            db.session.delete(event)
         try:
             db.session.commit()
             return redirect('home')
@@ -352,7 +386,158 @@ def eventedit(event_id):
                            end=event.end,
                            note=note,
                            status=event.status
-                        )
+                           )
+
+
+@app.route('/profile')
+def profile():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    # End of conditions ******************************
+    return redirect("home")
+
+
+@app.route('/groups')
+def groups():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if user is None:
+        session.clear()
+        return redirect(url_for('index'))
+    elif user.account_status == 0:
+        return render_template("waitforapproval.html")
+    elif user.account_type != 2:
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+
+    groups = Group.query.all()
+    return render_template("groups.html", avatar_url=user.avatar_url, groups=groups)
+
+
+@app.route('/groups/<id>', methods=['GET', 'POST'])
+def group_edit(id):
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if user is None:
+        session.clear()
+        return redirect(url_for('index'))
+    elif user.account_status == 0:
+        return render_template("waitforapproval.html")
+    elif user.account_type != 2:
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    group = Group.query.filter(Group.id == id).first()
+    if not group:
+        return redirect('/groups')
+    else:
+        member = []
+        outer = []
+        for user in User.query.all():
+            if GroupMember.query.filter(GroupMember.group_id == id).all():
+                member.append(user)
+            else:
+                outer.append(user)
+        # member.sort()
+        # outer.sort()
+        return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
+
+
+@app.route('/newgroup', methods=['GET', 'POST'])
+def newgroup():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if user is None:
+        session.clear()
+        return redirect(url_for('index'))
+    elif user.account_status == 0:
+        return render_template("waitforapproval.html")
+    elif user.account_type != 2:
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    group_action = request.values.get('group_action', '')
+    user_action = request.values.get('user_action', '')
+    if group_action:
+        new_name = request.values.get('new_name', '')
+        group_id = request.values.get('group_id', '')
+        if group_action == "add":
+            try:
+                group = Group(name=new_name)
+                db.session.add(group)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        if group_action == "rename":
+            try:
+                group = Group.query.filter(Group.id == group_id).first()
+                group.name = new_name
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        elif group_action == "cancel":
+            return redirect("/groups")
+        elif group_action == "delete":
+            try:
+                group = Group.query.filter(Group.id == group_id).first()
+                member_data = GroupMember.query.filter(GroupMember.id == group_id).all()
+                db.session.delete(group)
+                for member in member_data:
+                    db.session.delete(member)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        return redirect('/groups')
+    if user_action:
+        user_id = request.values.get('user_id', '')
+        group_id = request.values.get('group_id', '')
+        if user_action == "add":
+            try:
+                new_member = GroupMember(group_id=group_id, user_id=user_id)
+                db.session.add(new_member)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        elif user_action == "remove":
+            try:
+                old_member = GroupMember.query.filter(GroupMember.user_id == user_id, GroupMember.group_id == group_id).first()
+                db.session.delete(old_member)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        if len(str(group_id)) > 0:
+            return redirect('/groups/' + str(group_id))
+        else:
+            return redirect('/groups')
+    return render_template('newgroup.html', avatar_url=user.avatar_url, group=None, member=[], outer=User.query.all())
+
+
+@app.route('/calendars')
+def calendars():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if (user is None):
+        session.clear()
+        return redirect(url_for('index'))
+    elif (user.account_status == 0):
+        return render_template("waitforapproval.html")
+    elif (user.account_type != 2):
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    return redirect("home")
 
 
 @app.route('/logout')

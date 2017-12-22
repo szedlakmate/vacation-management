@@ -57,6 +57,14 @@ a:hover {
     color: red;
 }
 
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
+
 #loading {
     display: none;
     position: absolute;
@@ -71,9 +79,6 @@ a:hover {
 }
 
 /* COLORMAP # Must be in sync with the app.py file - COLORMAP array !!!! */
-.light {
-    opacity: 0.5;
-}
 
 .default {
     border: 1px solid #3a87ad;
@@ -96,8 +101,8 @@ a:hover {
 }
 
 .red {
-    border: 1px solid red;
-    background-color: red;
+    border: 1px solid #ff5b5b;
+    background-color: #ff5b5b;
 }
 
 .amber {
@@ -108,4 +113,12 @@ a:hover {
 .purple {
     border: 1px solid #6500a5;
     background-color: #6500a5;
+}
+
+.light {
+    opacity: 0.5;
+}
+
+.redborder {
+    border: 2px solid red;
 }

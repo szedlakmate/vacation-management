@@ -54,18 +54,45 @@
         </div>
     </nav>
     <div>
-	{% from "_formhelpers.html" import render_field %}
-	<form method=post>
-		<dl>
-			{{ render_field(form.calendar_list) }}
-			{{ render_field(form.start) }}
-			{{ render_field(form.end) }}
-            {{ render_field(form.note) }}
-		</dl>
-		<p><input type=submit value=Register>
-	</form>
 
+        <form action="/newgroup" method="post">
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="text" name="new_name" {% if group != None %} value="{{ group.name }}" {% endif %}> {% if group == None %}<button name="group_action" value="add">Add</button>{% else %}<button name="group_action" value="rename">Rename</button>{% endif %} <button name="group_action" value="cancel">Cancel</button>{% if group != None %} <button name="group_action" value="delete">Delete</button>{% endif %}
+        </form>
     </div>
+
+    {% if group != None %}
+    <div>
+    <h3>Members</h3>
+
+        <ul>
+            {% for user in member %}
+            <form action="/newgroup" method="post">
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="hidden" name="user_action" value="remove"/>
+                <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Remove</button></li>
+            </form>
+            {% endfor %}
+            {% if member|length == 0 %}
+                There is no member.
+            {% endif %}
+        </ul>
+
+    <h3>Others</h3>
+        <ul>
+            {% for user in outer %}
+            <form action="/newgroup" method="post">
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="hidden" name="user_action" value="add"/>
+                <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
+            {% endfor %}
+            {% if outer|length == 0 %}
+                There is no other user.
+            {% endif %}
+        </ul>
+    </form>
+    </div>
+    {% endif %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>

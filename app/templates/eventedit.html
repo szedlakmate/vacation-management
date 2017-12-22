@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>VM - Events</title>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -39,7 +39,7 @@
                 <img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
             </a>
 
-            <a class="d-inline" href="/groups">
+            <a class="d-inline" href="/groups/all">
                 Groups
             </a>
 
@@ -58,7 +58,14 @@
     </nav>
     <div>
         <form action="" method="post">
-            {{ username }} - {{ calendar_name }} -  {{ start }} - {{ end }}{% if note != "" %} -  {{ note }}{% endif %} - {% if status == 1 %}Allowed{% else %}Denied{% endif %} - <button name="allow" value="1">Allow</button> <button name="allow" value="0">Deny</button>
+            {{ username }} - {{ calendar_name }} -  {{ start }} - {{ end }}{% if note != "" %} -  {{ note }}{% endif %}
+            {% if status == 1 %}Allowed{% elif status == -1 %} - Denied{% endif %} -
+            {% if account_type == 2 %}
+                {% if status != 1 %}<button name="allow" value="1">Allow</button>{% endif %}
+                {% if status != -1 %}<button name="allow" value="-1">Deny</button>{% endif %}
+            {% endif %}
+            {% if status == 0 %}<button name="allow" value="-2">Delete</button>{% endif %}
+
         </form>
 
     </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>VM - Home</title>
 	<meta charset="utf-8">
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -29,23 +29,27 @@
 				<img src= "{{ url_for('static', filename='img/logo.png') }}" class="d-inline-block" width="50" height="50" class="d-inline-block align-top" alt="">
 				Vacation Manager
 			</a>
+			{% if account_type != 1 %}
 			<a class="nav-item" href="/newevent">
 				<img src= "{{ url_for('static', filename='img/plus.png') }}" class="d-inline-block" width="35" height="35" class="d-inline-block align-top" alt="">
 			</a>
+			{% endif %}
 		</div>
 
 		<div class="no-wrap">
+			{% if account_type == 2 %}
 			<a class="d-inline" href="/calendars">
 				<img src= "{{ url_for('static', filename='img/calendar.png') }}" class="d-inline-block"  width="40" height="40" class="d-inline-block align-top" alt="">
 			</a>
 
-			<a class="d-inline" href="/groups">
+			<a class="d-inline" href="/groups/all">
 				Groups
 			</a>
 
 			<a class="d-inline" href="/users">
 				Users
 			</a>
+			{% endif %}
 
 			<a class="d-inline avatar" href="/profile">
 				<img src= "{{ avatar_url }}"  class="d-inline-block avatar-img" alt="">
