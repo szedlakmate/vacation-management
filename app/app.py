@@ -133,8 +133,8 @@ def return_data():
         if eventcolor:
             style += eventcolor
         title = ''
-        if not event.user_id == user.ext_id:
-            title = user.nickname
+        if event.user_id:
+            title += str(User.query.filter(User.ext_id == event.user_id).first().nickname)
         if event.note:
             title += '-' + event.note
         events_arr.append({
@@ -247,7 +247,7 @@ def home():
         return redirect(url_for('index'))
     elif (user.account_status == 0):
         return render_template("message.html",
-                               message="Please wait until admin approval. Contact an admin if needed.",
+                               message="Please wait for admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
     return render_template("home.html", avatar_url=user.avatar_url, account_type= user.account_type)
@@ -264,7 +264,7 @@ def newevent():
         return redirect(url_for('index'))
     elif (user.account_status == 0):
         return render_template("message.html",
-                               message="Please wait until admin approval. Contact an admin if needed.",
+                               message="Please wait for admin approval. Contact an admin if needed.",
                                avatar_url=user.avatar_url)
     # End of standard conditions ******************************
     form = NewEventForm(request.form)
@@ -316,7 +316,9 @@ def users():
         session.clear()
         return redirect(url_for('index'))
     elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to manage the user accounts. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
@@ -341,7 +343,9 @@ def eventedit(event_id):
             session.clear()
             return redirect(url_for('index'))
         elif (user.account_status == 0):
-            return render_template("waitforapproval.html")
+            return render_template("message.html",
+                                   message="Please wait for admin approval. Contact an admin if needed.",
+                                   avatar_url=user.avatar_url)
         elif (user.account_type < 1) and (event.user_id != user.ext_id) and (event.status != 0):
             return render_template("message.html", message="You cannot edit this holiday.", avatar_url=user.avatar_url)
     except AttributeError:
@@ -396,7 +400,9 @@ def profile():
         session.clear()
         return redirect(url_for('index'))
     elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     # End of conditions ******************************
     return redirect("home")
 
@@ -411,7 +417,9 @@ def groups():
         session.clear()
         return redirect(url_for('index'))
     elif user.account_status == 0:
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
@@ -430,7 +438,9 @@ def group_edit(id):
         session.clear()
         return redirect(url_for('index'))
     elif user.account_status == 0:
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
@@ -440,11 +450,11 @@ def group_edit(id):
     else:
         member = []
         outer = []
-        for user in User.query.all():
-            if GroupMember.query.filter(GroupMember.group_id == id, GroupMember.user_id == user.ext_id).all():
-                member.append(user)
+        for account in User.query.all():
+            if GroupMember.query.filter(GroupMember.group_id == id, GroupMember.user_id == account.ext_id).all():
+                member.append(account)
             else:
-                outer.append(user)
+                outer.append(account)
         # member.sort()
         # outer.sort()
         return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
@@ -460,7 +470,9 @@ def newgroup():
         session.clear()
         return redirect(url_for('index'))
     elif user.account_status == 0:
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
@@ -488,7 +500,7 @@ def newgroup():
         elif group_action == "delete":
             try:
                 group = Group.query.filter(Group.id == group_id).first()
-                member_data = GroupMember.query.filter(GroupMember.id == group_id).all()
+                member_data = GroupMember.query.filter(GroupMember.group_id == group_id).all()
                 db.session.delete(group)
                 for member in member_data:
                     db.session.delete(member)
@@ -530,7 +542,9 @@ def calendars():
         session.clear()
         return redirect(url_for('index'))
     elif (user.account_status == 0):
-        return render_template("waitforapproval.html")
+        return render_template("message.html",
+                               message="Please wait for admin approval. Contact an admin if needed.",
+                               avatar_url=user.avatar_url)
     elif (user.account_type != 2):
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
