@@ -55,18 +55,20 @@
     </nav>
     <div>
 
-        <form action="/groups/{{ group.id }}" method="post">
-                <input type="text" name="new_name" value="{{ group.name }}"> <button name="action" value="rename">Rename</button> <button name="action" value="cancel">Cancel</button> <button name="action" value="delete">Delete</button>
+        <form action="/newgroup" method="post">
+                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
+                <input type="text" name="new_name" {% if group != None %} value="{{ group.name }}" {% endif %}> {% if group == None %}<button name="group_action" value="add">Add</button>{% else %}<button name="group_action" value="rename">Rename</button>{% endif %} <button name="group_action" value="cancel">Cancel</button>{% if group != None %} <button name="group_action" value="delete">Delete</button>{% endif %}
         </form>
     </div>
 
+    {% if group != None %}
     <div>
     <h3>Members</h3>
-    <form action="/blabla" method="post">
-        <input type="hidden" name="action" value="0"/>
+    <form action="/newgroup" method="post">
+        <input type="hidden" name="user_action" value="remove"/>
         <ul>
             {% for user in member %}
-            <li>{{ user.name }} ({{ user.nickname }}) <button name="id" value="{{ user.ext_id }}">Remove</button></li>
+            <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Remove</button></li>
             {% endfor %}
             {% if member|length == 0 %}
                 There is no member.
@@ -74,11 +76,11 @@
         </ul>
     </form>
     <h3>Others</h3>
-    <form action="/blabla" method="post">
-        <input type="hidden" name="action" value="1"/>
         <ul>
             {% for user in outer %}
-                <li>{{ user.name }} ({{ user.nickname }}) <button name="id" value="{{ user.ext_id }}">Add</button></li>
+            <form action="/newgroup" method="post">
+                <input type="hidden" name="group_id" value="{{ group.id}}"/>
+                <li>{{ group.id}} {{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
             {% endfor %}
             {% if outer|length == 0 %}
                 There is no other user.
@@ -86,6 +88,7 @@
         </ul>
     </form>
     </div>
+    {% endif %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>

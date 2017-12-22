@@ -437,10 +437,6 @@ def group_edit(id):
     elif user.account_type != 2:
         return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
     # End of conditions ******************************
-    action = request.values.get('action', '')
-    if action:
-        name = request.values.get('new_name', '')
-        return redirect('/groups')
     group = Group.query.filter(Group.id == id).first()
     if not group:
         return redirect('/groups')
@@ -455,6 +451,69 @@ def group_edit(id):
         # member.sort()
         # outer.sort()
         return render_template('newgroup.html', avatar_url=user.avatar_url, group=group, member=member, outer=outer)
+
+
+@app.route('/newgroup', methods=['GET', 'POST'])
+def newgroup():
+    # Conditions *************************************
+    if DEBUG:
+        pdb.set_trace()
+    user = User.query.filter(User.ext_id_hashed==session.get('profile_ext_id_hashed')).first()
+    if user is None:
+        session.clear()
+        return redirect(url_for('index'))
+    elif user.account_status == 0:
+        return render_template("waitforapproval.html")
+    elif user.account_type != 2:
+        return render_template("message.html", message="You do not have proper right to access this site. Please contact an admin if needed.", avatar_url=user.avatar_url)
+    # End of conditions ******************************
+    group_action = request.values.get('group_action', '')
+    user_action = request.values.get('user_action', '')
+    if group_action:
+        new_name = request.values.get('new_name', '')
+        group_id = request.values.get('group_id', '')
+        if group_action == "add":
+            try:
+                group = Group(name=new_name)
+                db.session.add(group)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        if group_action == "rename":
+            try:
+                group = Group.query.filter(Group.id == group_id).first()
+                group.name = new_name
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        elif group_action == "cancel":
+            return redirect("/groups")
+        elif group_action == "delete":
+            try:
+                db.session.delete(group)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        return redirect('/groups')
+    if user_action:
+        user_id = request.values.get('user_id', '')
+        group_id = request.values.get('group_id', '')
+        if user_action == "add":
+            try:
+                new_member = GroupMember(group_id=group_id, user_id=user_id)
+                db.session.add(new_member)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        elif user_action == "remove":
+            try:
+                old_member = GroupMember.query.filter(GroupMember.user_id == user_id).first()
+                db.session.delete(old_member)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        return redirect('/groups')
+    return render_template('newgroup.html', avatar_url=user.avatar_url, group=None, member=[], outer=User.query.all())
 
 
 @app.route('/calendars')
