@@ -685,7 +685,7 @@ def logout():
 
 @app.route('/reset')
 def reset():
-    database = CreateDB(hostname=ConfigData.DB_HOSTNAME)
+    database = CreateDB()
     create_tables()
     setup_db()
     return redirect(url_for('index'))
