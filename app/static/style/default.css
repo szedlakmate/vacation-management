@@ -101,6 +101,11 @@ a:hover {
     margin-top: 1em;
 }
 
+.margin-top-small {
+    margin-top: 3px;
+}
+
+
 .opaque-message {
     background-color: rgba(170, 170, 170, 0.5);
     color: rgb(50, 50, 50);
