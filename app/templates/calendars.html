@@ -2,25 +2,30 @@
 {% block title %}VM - Calendars{% endblock %}
 
 {% block content %}
-        <div class="left">
-        <a href="/newcalendar">
+<div class="container margin-top">
+    <div class="left">
+        <a class="btn btn-primary margin-top-small" href="/newcalendar">
             New Calendar
         </a>
     </div>
 
     <div class="container opaque-message">
-    <h3>Calendars</h3>
-        <ul>
+        <h3>Calendars</h3>
+        <table style=" margin: auto; ">
             {% for calendar in calendars %}
-            <form action="/calendars" method="post">
-                <li class="no-bullet">{{ calendar.name }} <button name="calendar_id" value="{{ calendar.id }}">Edit</button></li>
-            </form>
+            <tr>
+                <form action="/calendars" method="post">
+                    <td>{{ calendar.name }}</td>
+                    <td><button class="btn btn-warning btn-sm margin-top-small" name="calendar_id" value="{{ calendar.id }}">Edit</button></td>
+                </form>
+            </tr>
             {% endfor %}
             {% if calendars|length == 0 %}
                 There is no calendar defined.
             {% endif %}
-        </ul>
+        </table>
     </div>
+</div>
 
 {% endblock %}
 

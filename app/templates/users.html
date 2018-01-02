@@ -1,5 +1,5 @@
 {% extends "_navbar.html" %}
-{% block title %}VM - Home{% endblock %}
+{% block title %}VM - Users{% endblock %}
 
 {% block content %}
     <div class="container margin-top">
@@ -7,27 +7,34 @@
             <h3>Inactive Users</h3>
             <form action="/activateuser" method="post">
                 <input type="hidden" name="action" value="1"/>
-                <ul class="no-bullet">
+                <table>
                     {% for user in inactive %}
-                        <li class="no-bullet">{{ user.name }} ({{ user.nickname }}) <button class="btn btn-success btn-sm margin-top-small" name="id" value="{{ user.ext_id }}">Activate</button></li>
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>({{ user.nickname }})</td>
+                        <td><button class="btn btn-success btn-sm margin-top-small" name="id" value="{{ user.ext_id }}">Activate</button></td>
+                    </tr>
                     {% endfor %}
                     {% if inactive|length == 0 %}
                         There is no inactive user.
 
                     {% endif %}
-                </ul>
+                </table>
             </form>
 
 
             <h3>Active Users</h3>
             <form action="/activateuser" method="post">
                 <input type="hidden" name="action" value="0"/>
-                <ul class="no-bullet">
+                    <table>
                     {% for user in active %}
-                    <li class="no-bullet">{{ user.name }} ({{ user.nickname }}) {% if user.ext_id != current_ext_id %}
-                            <button class="btn btn-outline-danger btn-sm margin-top-small" name="id" value="{{ user.ext_id }}">Inactivate</button>
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>({{ user.nickname }})</td>
+                            {% if user.ext_id != current_ext_id %}
+                            <td><button class="btn btn-outline-danger btn-sm margin-top-small" name="id" value="{{ user.ext_id }}">Inactivate</button></td>
 
-                            <button class="btn btn-primary btn-sm margin-top-small" name="typechange" value="{{ user.ext_id }}">
+                            <td><button class="btn btn-primary btn-sm margin-top-small" name="typechange" value="{{ user.ext_id }}">
                                 {% if user.account_type == 0 %}
                                     Make Viewer
                                 {% elif user.account_type == 1 %}
@@ -36,12 +43,13 @@
                                     Make Standard
                                 {% endif %}
 
-                            </button>
+                            </button></td>
                         {% else %}
-                            <button name="id" class="btn btn-secondary btn-sm margin-top-small" value="not-valid" disabled>Current user</button>
-                        {% endif %} </li>
+                            <td><button name="id" class="btn btn-secondary btn-sm margin-top-small" value="not-valid" disabled>Current user</button></td>
+                        {% endif %}
+                    </tr>
                     {% endfor %}
-                </ul>
+                    </table>
             </form>
         </div>
     </div>

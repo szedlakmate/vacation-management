@@ -2,7 +2,8 @@
 {% block title %}VM - Profile{% endblock %}
 
 {% block content %}
-     <div>
+<div class="container margin-top">
+    <div class="opaque-message">
     <h3>Profile</h3>
         <div>
             <div>Name: {{ user.name }}</div>
@@ -24,5 +25,6 @@
                 There is no active group membership.
             {% endif %}
         </ul>
-    </div>
+        </div>
+</div>
 {% endblock %}
