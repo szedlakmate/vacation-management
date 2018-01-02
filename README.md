@@ -37,4 +37,4 @@ In order to use the app, google login is required.
 Please note that the very first user who registers will automatically become admin.
 
 # Known bugs
-The list of known bugs can be reached [here](https://github.com/szedlakmate/vacation-management/known_bugs).
+The list of known bugs can be reached [here](https://github.com/szedlakmate/vacation-management/blob/master/Known_bugs.md).
