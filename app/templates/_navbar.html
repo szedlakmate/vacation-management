@@ -20,6 +20,8 @@
 	<link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
 	<!-- END CALENDAR -->
 
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 	{% endblock %}
 
 </head>
@@ -30,7 +32,7 @@
 				<img src= "{{ url_for('static', filename='img/logo.png') }}" width="40" height="40" class="d-inline-block" alt="">
 				Vacation Manager
 			</a>
-			{% if user and user.account_type != 1 %}
+			{% if user and user.account_type != 1 and user.account_status == 1 %}
 			<a class="nav-item" href="/newevent">
 				<img src= "{{ url_for('static', filename='img/plus.png') }}" width="35" height="35" class="d-inline-block" alt="">
 			</a>
@@ -52,13 +54,13 @@
 			</a>
 			{% endif %}
 
-            {% if login_url%}
+            {% if login_url %}
             <a class="d-inline" href="{{ login_url }}">
 			    <img src= "{{ url_for('static', filename='img/Gsignin.png') }}"  height="40" class="d-inline-block" alt="">
             </a>
             {% elif not register %}
 
-			<a class="d-inline avatar" href="/profile">
+			<a class="d-inline avatar" href="{% if user %}/profile{% else %}#{% endif %}">
 				<img src= "{{ user.avatar_url }}"  class="d-inline-block avatar-img" alt="">
 			</a>
 

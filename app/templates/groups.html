@@ -72,7 +72,7 @@
         <ul>
             {% for group in groups %}
             <form action="/groups/{{ group.id }}" method="post">
-                <li>{{ group.name }}<button name="id" value="{{ group.id }}">Edit</button></li>
+                <li class="no-bullet">{{ group.name }}<button name="id" value="{{ group.id }}">Edit</button></li>
             </form>
             {% endfor %}
             {% if groups|length == 0 %}

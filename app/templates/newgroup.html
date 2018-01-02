@@ -94,7 +94,7 @@
             <form action="/newgroup" method="post">
                 {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
                 <input type="hidden" name="user_action" value="add"/>
-                <li>{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
+                <li class="no-bullet">{{ user.name }} ({{ user.nickname }}) <button name="user_id" value="{{ user.ext_id }}">Add</button></li>
             </form>
             {% endfor %}
             {% if outer|length == 0 %}

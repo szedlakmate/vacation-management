@@ -433,7 +433,7 @@ def profile():
     elif user.account_status == 0:
         return render_template("message.html",
                                message="Please wait for admin approval. Contact an admin if needed.",
-                               avatar_url=user.avatar_url)
+                               avatar_url=user.avatar_url, user=user)
     # End of conditions ******************************
     group_ids = GroupMember.query.filter(GroupMember.user_id == user.ext_id).all()
     group_names = []

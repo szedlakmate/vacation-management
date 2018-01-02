@@ -97,12 +97,20 @@ a:hover {
     padding: 0 10px;
 }
 
+.margin-top {
+    margin-top: 1em;
+}
+
 .opaque-message {
     background-color: rgba(170, 170, 170, 0.5);
-    color: whitesmoke;
+    color: rgb(50, 50, 50);
     width: fit-content;
     margin: auto;
     padding: 5px 10px;
+}
+
+.no-bullet {
+    list-style-type: none;
 }
 
 /* CAL_COLORMAP:  Must be in sync with the config.py file - CAL_COLORMAP array! */
