@@ -94,7 +94,7 @@ a:hover {
 
 .white {
     background-color: rgba(200, 200, 200, 0.45);
-    color: ghostwhite;
+    color: whitesmoke;
 }
 
 /* CAL_COLORMAP:  Must be in sync with the config.py file - CAL_COLORMAP array! */

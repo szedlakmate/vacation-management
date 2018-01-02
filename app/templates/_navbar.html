@@ -56,7 +56,7 @@
             <a class="d-inline" href="{{ login_url }}">
 			    <img src= "{{ url_for('static', filename='img/Gsignin.png') }}"  height="40" class="d-inline-block align-top" alt="">
             </a>
-            {% elif not register and not message%}
+            {% elif not register %}
 
 			<a class="d-inline avatar" href="/profile">
 				<img src= "{{ user.avatar_url }}"  class="d-inline-block avatar-img" alt="">

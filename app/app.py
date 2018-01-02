@@ -273,7 +273,7 @@ def home():
     elif user.account_status == 0:
         return render_template("message.html",
                                message="Please wait for admin approval. Contact an admin if needed.",
-                               avatar_url=user.avatar_url)
+                               user=user, avatar_url=user.avatar_url)
     # End of standard conditions *****************************************************
 
     return render_template("home.html", user=user)
