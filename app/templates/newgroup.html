@@ -4,9 +4,13 @@
 {% block content %}
     <div class="container margin-top">
 
-        <form action="/newgroup" method="post">
-                {% if group != None %}<input type="hidden" name="group_id" value="{{ group.id }}"/>{% endif %}
-                <input type="text" name="new_name" {% if group != None %} value="{{ group.name }}" {% endif %}> {% if group == None %}<button class="btn btn-success btn-sm margin-top-small" name="group_action" value="add">Add</button>{% else %}<button class="btn btn-success btn-sm margin-top-small" name="group_action" value="rename">Rename</button>{% endif %} <button class="btn btn-danger btn-sm margin-top-small" name="group_action" value="cancel">Cancel</button>{% if group != None %} <button class="btn btn-outline-danger btn-sm margin-top-small" name="group_action" value="delete">Delete</button>{% endif %}
+        <form action="/newgroup" method="post" class="form-inline">
+            <div class="row form">
+            {% if group != None %}
+                <input type="hidden" name="group_id" value="{{ group.id }}"/>
+            {% endif %}
+            <input class="form-control" type="text" name="new_name" placeholder="Group name" {% if group != None %} value="{{ group.name }}" {% endif %}> {% if group == None %}<button class="btn btn-success btn-sm margin-top-small" name="group_action" value="add">Add</button>{% else %}<button class="btn btn-success btn-sm margin-top-small" name="group_action" value="rename">Rename</button>{% endif %} <button class="btn btn-danger btn-sm margin-top-small" name="group_action" value="cancel">Cancel</button>{% if group != None %} <button class="btn btn-outline-danger btn-sm margin-top-small" name="group_action" value="delete">Delete</button>{% endif %}
+            </div>
         </form>
     </div>
 

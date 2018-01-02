@@ -41,15 +41,15 @@
 
 		<div class="no-wrap">
 			{% if user and user.account_type == 2 %}
-			<a class="d-inline" href="/calendars">
+			<a class="d-inline margin-small" href="/calendars">
 				<img src= "{{ url_for('static', filename='img/calendar.png') }}" width="40" height="40" class="d-inline-block" alt="">
 			</a>
 
-			<a class="d-inline" href="/groups/all">
+			<a class="d-inline btn margin-small padding-small" href="/groups/all">
 				Groups
 			</a>
 
-			<a class="d-inline" href="/users">
+			<a class="d-inline btn margin-small padding-small" href="/users">
 				Users
 			</a>
 			{% endif %}
@@ -60,11 +60,11 @@
             </a>
             {% elif not register %}
 
-			<a class="d-inline avatar" href="{% if user %}/profile{% else %}#{% endif %}">
+			<a class="d-inline margin-small avatar" href="{% if user %}/profile{% else %}#{% endif %}">
 				<img src= "{{ user.avatar_url }}"  class="d-inline-block avatar-img" alt="">
 			</a>
 
-			<a class="d-inline" href="/logout">
+			<a class="d-inline margin-small " href="/logout">
 				<img src= "{{ url_for('static', filename='img/logout.png') }}" width="30" height="30" class="d-inline-block" alt="">
 			</a>
             {% endif %}

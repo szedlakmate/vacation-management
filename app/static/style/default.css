@@ -39,7 +39,7 @@ a:hover {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    border: 1px solid rgba(50,50,50,0.4);
+    border: 2px solid rgba(0, 0, 0, 0.5);
 }
 
 .no-padding {
@@ -107,6 +107,10 @@ a:hover {
 
 .margin-small {
     margin: 3px;
+}
+
+.padding-small {
+    padding: 3px;
 }
 
 
