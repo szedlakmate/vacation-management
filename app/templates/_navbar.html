@@ -24,15 +24,15 @@
 
 </head>
 <body>
-	<nav class="navbar navbar-light bg-light">
+	<nav class="navbar navbar-light bg-light padding-short">
 		<div class="no-wrap">
 			<a class="navbar-brand no-padding"  href="/home">
-				<img src= "{{ url_for('static', filename='img/logo.png') }}" width="40" height="40" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/logo.png') }}" width="40" height="40" class="d-inline-block" alt="">
 				Vacation Manager
 			</a>
 			{% if user and user.account_type != 1 %}
 			<a class="nav-item" href="/newevent">
-				<img src= "{{ url_for('static', filename='img/plus.png') }}" width="35" height="35" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/plus.png') }}" width="35" height="35" class="d-inline-block" alt="">
 			</a>
 			{% endif %}
 		</div>
@@ -40,7 +40,7 @@
 		<div class="no-wrap">
 			{% if user and user.account_type == 2 %}
 			<a class="d-inline" href="/calendars">
-				<img src= "{{ url_for('static', filename='img/calendar.png') }}" width="40" height="40" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/calendar.png') }}" width="40" height="40" class="d-inline-block" alt="">
 			</a>
 
 			<a class="d-inline" href="/groups/all">
@@ -54,7 +54,7 @@
 
             {% if login_url%}
             <a class="d-inline" href="{{ login_url }}">
-			    <img src= "{{ url_for('static', filename='img/Gsignin.png') }}"  height="40" class="d-inline-block align-top" alt="">
+			    <img src= "{{ url_for('static', filename='img/Gsignin.png') }}"  height="40" class="d-inline-block" alt="">
             </a>
             {% elif not register %}
 
@@ -63,13 +63,13 @@
 			</a>
 
 			<a class="d-inline" href="/logout">
-				<img src= "{{ url_for('static', filename='img/logout.png') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+				<img src= "{{ url_for('static', filename='img/logout.png') }}" width="30" height="30" class="d-inline-block" alt="">
 			</a>
             {% endif %}
 		</div>
 	</nav>
 
-	<div id="content" class="container padding-top">
+	<div id="content" class="">
 		{% block content %}
 		{% endblock %}
 	</div>

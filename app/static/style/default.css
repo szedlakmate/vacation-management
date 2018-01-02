@@ -50,6 +50,11 @@ a:hover {
     padding-top: 1.5em;
 }
 
+.padding-short {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
 .no-wrap {
     white-space: nowrap;
 }
@@ -92,9 +97,12 @@ a:hover {
     padding: 0 10px;
 }
 
-.white {
-    background-color: rgba(200, 200, 200, 0.45);
+.opaque-message {
+    background-color: rgba(170, 170, 170, 0.5);
     color: whitesmoke;
+    width: fit-content;
+    margin: auto;
+    padding: 5px 10px;
 }
 
 /* CAL_COLORMAP:  Must be in sync with the config.py file - CAL_COLORMAP array! */
