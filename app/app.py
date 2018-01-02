@@ -73,7 +73,11 @@ def login_success(token, profile):
     if User.query.filter(User.ext_id == profile['id']).first() is not None:
         session['profile_ext_id_hashed'] = hash_id(profile['id'])
         User.query.filter(User.ext_id == profile['id']).first().ext_id_hashed = session['profile_ext_id_hashed']
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.rollback()
+            session.clear()
         return redirect('home')
     else:
         # Setting session cookie
@@ -254,7 +258,7 @@ def register():
             session.clear()
             return redirect(url_for('index'))
 
-    return render_template('register.html', form=form)
+    return render_template('register.html', form=form, register=True)
 
 
 @app.route('/home')
@@ -269,7 +273,7 @@ def home():
     elif user.account_status == 0:
         return render_template("message.html",
                                message="Please wait for admin approval. Contact an admin if needed.",
-                               avatar_url=user.avatar_url)
+                               user=user, avatar_url=user.avatar_url)
     # End of standard conditions *****************************************************
 
     return render_template("home.html", user=user)
@@ -429,7 +433,7 @@ def profile():
     elif user.account_status == 0:
         return render_template("message.html",
                                message="Please wait for admin approval. Contact an admin if needed.",
-                               avatar_url=user.avatar_url)
+                               avatar_url=user.avatar_url, user=user)
     # End of conditions ******************************
     group_ids = GroupMember.query.filter(GroupMember.user_id == user.ext_id).all()
     group_names = []
