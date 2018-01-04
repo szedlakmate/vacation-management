@@ -5,4 +5,4 @@ WORKDIR /code
 RUN pip install -r requirements.txt
 
 EXPOSE 443
-EXPOSE 8080
+#EXPOSE 8080
